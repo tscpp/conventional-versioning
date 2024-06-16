@@ -8,6 +8,10 @@
     "conventional-versioning": "./dist/bin.js",
     "conver": "./dist/bin.js"
   },
+  "files": [
+    "./dist/",
+    "./schema.json"
+  ],
   "scripts": {
     "build": "tsc",
     "conver": "node ./dist/bin.js",

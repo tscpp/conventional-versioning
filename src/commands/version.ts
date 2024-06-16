@@ -59,7 +59,7 @@ export default declareCommand({
 
     const workspace = await getWorkspace(args.workspaceDir);
     await logger.verbose(
-      `Found ${workspace.packages.length} package(s) in workspace.`,
+      `Found ${workspace.packages.length} package(s) in workspace.`
     );
 
     const git = await createGit();
@@ -67,7 +67,7 @@ export default declareCommand({
 
     if (!config.base) {
       await logger.debug(
-        "No 'base' property was set in config. Treating as first versioning ever.",
+        "No 'base' property was set in config. Treating as first versioning ever."
       );
     }
 
@@ -77,7 +77,7 @@ export default declareCommand({
     await logger.debug(
       `${commits.length} commits since ${
         config.base ? renderCommitHash(config.base) : "ever"
-      }` + (commits.length ? ":\n" + renderCommitList(commits) : "."),
+      }` + (commits.length ? ":\n" + renderCommitList(commits) : ".")
     );
 
     // Enter/exit pre-release for all packages.
@@ -137,7 +137,11 @@ async function getCommitDetails({
   config: Config;
   options: NormalizedOptions;
 }) {
-  const cParser = new ConvetionalCommitsParser();
+  const cParser = new ConvetionalCommitsParser({
+    // ty! https://github.com/conventional-changelog/conventional-changelog/issues/648#issuecomment-704867077
+    headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
+    breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,
+  });
 
   const gitCommits = await git.log({
     pattern: config.base ? ["HEAD", `^${config.base}`] : [],
@@ -153,11 +157,11 @@ async function getCommitDetails({
       if (
         error instanceof ExecaError &&
         (error.stderr! as string)?.includes(
-          "unknown revision or path not in the working tree",
+          "unknown revision or path not in the working tree"
         )
       ) {
         await logger.verbose(
-          `Found first ever commit [${commit.hash.slice(0, 7)}]!`,
+          `Found first ever commit [${commit.hash.slice(0, 7)}]!`
         );
         diff = [];
       } else {
@@ -177,7 +181,7 @@ async function getCommitDetails({
     if (invalid.length > 0) {
       await logger.warn(
         `Found ${invalid.length} invalid conventional commit summary(s):\n` +
-          renderCommitList(invalid),
+          renderCommitList(invalid)
       );
     }
   }
@@ -197,7 +201,7 @@ function renderCommitHash(commit: CommitDetail | GitCommit | string) {
 
 function renderCommitList(commits: CommitDetail[]) {
   return renderList(
-    commits.map((commit) => renderCommitHash(commit) + " " + commit.cc.header),
+    commits.map((commit) => renderCommitHash(commit) + " " + commit.cc.header)
   );
 }
 
@@ -216,7 +220,7 @@ async function updatePreReleases({
         !Object.keys(config.pre.original ?? {}).includes(pkg.name)
       ) {
         await logger.fatal(
-          `Package '${pkg.name}' is set to pre-release, but is not configured correctly. Run \`${SCRIPT_NAME} pre enter\` to fix this issue.`,
+          `Package '${pkg.name}' is set to pre-release, but is not configured correctly. Run \`${SCRIPT_NAME} pre enter\` to fix this issue.`
         );
       }
     } else if (isPreRelease(pkg.version)) {
@@ -258,7 +262,7 @@ async function updateVersion({
       const bumpLike = options.releaseTypes[detail.cc.type];
       if (!bumpLike) {
         await logger.warn(
-          `Did not recognize CC commit type "${detail.cc.type}". Add it to the 'bump' record in the config.`,
+          `Did not recognize CC commit type "${detail.cc.type}". Add it to the 'bump' record in the config.`
         );
       }
 
@@ -314,7 +318,7 @@ async function updateVersion({
     if (!originalVersion) {
       // This should be already caught. Just to be safe.
       throw await logger.fatal(
-        `Original version for pre-release package '${pkg.name}' is not configured.`,
+        `Original version for pre-release package '${pkg.name}' is not configured.`
       );
     }
     originalVersion = new SemVer(originalVersion);
@@ -354,7 +358,7 @@ async function updateVersion({
       await logger.debug(
         `Increment package '${
           pkg.name
-        }' version '${currentVersion.format()}' with '${releaseType}' results in '${newVersion.format()}'.`,
+        }' version '${currentVersion.format()}' with '${releaseType}' results in '${newVersion.format()}'.`
       );
 
       // Set new package version.
@@ -382,9 +386,9 @@ async function updateVersion({
               (update.name + ":  ").padEnd(columns[0] + 3, " ") +
               chalk.red(update.oldVersion.padEnd(columns[1]), " ") +
               "->  " +
-              chalk.green(update.newVersion),
-          ),
-        ),
+              chalk.green(update.newVersion)
+          )
+        )
     );
   } else {
     await logger.info("No updates were made!");
@@ -425,7 +429,7 @@ async function updateDependencies({
 
         // Check if internal package.
         const dependencyPackage = workspace.packages.find(
-          (pkg) => pkg.name === name,
+          (pkg) => pkg.name === name
         )!;
         if (!dependencyPackage) {
           continue;
@@ -489,7 +493,7 @@ async function updateDependencies({
           if (allowsPreRelease) {
             if (options.warnOutdatedPreReleaseUsage) {
               await logger.warn(
-                `In '${ourPackage.configPath}', dependency "${name}" is set to a pre-release, even though a newer stable version is available.`,
+                `In '${ourPackage.configPath}', dependency "${name}" is set to a pre-release, even though a newer stable version is available.`
               );
             }
             continue;

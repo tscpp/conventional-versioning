@@ -3,8 +3,21 @@ import { readFile, writeFile } from "node:fs/promises";
 import { PACKAGE_NAME } from "./constants.js";
 
 const DEFAULT_BUMP_MAP = {
+  patch: "patch",
+  minor: "minor",
+  breaking: "major",
   fix: "patch",
   feat: "minor",
+  docs: "ignore",
+  documentation: "ignore",
+  style: "ignore",
+  refactor: "ignore",
+  perf: "patch",
+  peformance: "patch",
+  test: "ignore",
+  build: "ignore",
+  ci: "ignore",
+  chore: "ignore",
 };
 
 export interface Config {
@@ -104,7 +117,7 @@ export interface NormalizedOptions extends Options {
 }
 
 export function normalizeOptions(
-  options: Options | undefined,
+  options: Options | undefined
 ): NormalizedOptions {
   return {
     updateWorkspaceDependencies: options?.updateWorkspaceDependencies ?? true,

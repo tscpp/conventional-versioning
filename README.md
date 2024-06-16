@@ -47,7 +47,7 @@ conver init
 - **allowUpdateStableToPreRelease**: Allow updating the version of internal dependencies to a pre-release when a stable version was previously specified. Default: `false`.
 - **warnOutdatedPreReleaseUsage**: Issue a warning when pre-releases are used while newer stable releases exist for internal dependencies. Default: `true`.
 - **ignoreInvalidCommits**: Choose whether to warn when a commit message does not follow the conventional commits specification. Pre-commit hooks are recommended for enforcing conventional commits. Default: `false`.
-- **initialPreReleaseVersion**: Set the initial version of the pre-release identifier. For example, specify 1 to start with -beta.1 instead of -beta.0. Default: `0`.
+- **initialPreReleaseVersion**: Set the initial version of the pre-release identifier. For example, specify `1` to start with `-beta.1` instead of `-beta.0`. Default: `0`.
 - **preservePreReleaseSequence**: Preserve the sequence (version) of the pre-release identifier when bumping the version. Default: `false`.
 - **releaseTypes**: Map conventional commit types (fix, feat, chore, etc.) to version bumps (patch, minor, or major).
 

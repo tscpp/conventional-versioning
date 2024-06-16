@@ -5,8 +5,8 @@
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "conventional-versioning": "./dist/bin.js",
-    "conver": "./dist/bin.js"
+    "conventional-versioning": "dist/bin.js",
+    "conver": "dist/bin.js"
   },
   "files": [
     "./dist/",

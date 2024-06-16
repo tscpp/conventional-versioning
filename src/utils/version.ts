@@ -46,7 +46,7 @@ export function toBump(value: string): Bump {
 
 export function toReleaseType(
   bump: Bump,
-  skipMajor: boolean
+  skipMajor: boolean,
 ): ReleaseType | null {
   if (skipMajor) {
     bump = Math.min(bump, Bump.Minor);

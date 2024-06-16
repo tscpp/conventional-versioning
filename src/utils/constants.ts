@@ -1,2 +1,3 @@
-export const SCRIPT_NAME = "script_name";
-export const ENV_PREFIX = "SCRIPT_NAME_";
+export const SCRIPT_NAME = "conver";
+export const ENV_PREFIX = "CONVER_";
+export const PACKAGE_NAME = "conventional-versioning";

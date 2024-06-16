@@ -1,5 +1,6 @@
 import detectIndent from "detect-indent";
 import { readFile, writeFile } from "node:fs/promises";
+import { PACKAGE_NAME } from "./constants.js";
 
 const DEFAULT_BUMP_MAP = {
   fix: "patch",
@@ -7,32 +8,60 @@ const DEFAULT_BUMP_MAP = {
 };
 
 export interface Config {
-  base?: string;
+  $schema?: string | undefined;
+  base?: string | undefined;
   pre?: {
-    original?: Record<string, string>;
-    promote?:  Record<string, string>;
-    prerelease?: string[];
+    original?: Record<string, string> | undefined;
+    promote?: Record<string, string> | undefined;
+    prerelease?: string[] | undefined;
   };
-  options?: Options;
+  options?: Options | undefined;
 }
 
-export async function readConfig(path: string) {
-  return JSON.parse(await readFile(path, "utf8")) as Config;
+export async function readConfig(path: string): Promise<Config> {
+  let text: string;
+  try {
+    text = await readFile(path, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return {};
+    } else {
+      throw error;
+    }
+  }
+
+  return JSON.parse(text) as Config;
 }
 
 export async function writeConfig(path: string, config: Config) {
-  const text = await readFile(path, "utf8");
-  const indent = detectIndent(text);
-  cleanupConfig(config);
-  await writeFile(path, JSON.stringify(config, undefined, indent.indent));
+  let text: string | undefined;
+  try {
+    text = await readFile(path, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+  }
+  const indent = text ? detectIndent(text) : undefined;
+  config = cleanupConfig(config);
+  await writeFile(path, JSON.stringify(config, undefined, indent?.indent ?? 2));
 }
 
 function cleanupConfig(config: Config) {
+  // Add $schema
+  if (!config.$schema) {
+    config.$schema = `${PACKAGE_NAME}/schema.json`;
+  }
+
+  config.options ??= {};
+
+  // Remove unused.
   if (config.pre) {
     deleteEmpty(config.pre, ["original", "prerelease", "promote"]);
   }
-
   deleteEmpty(config, ["pre"]);
+
+  return config;
 
   function deleteEmpty<T extends object>(object: T, keys: (keyof T)[]) {
     for (const key of keys) {
@@ -75,7 +104,7 @@ export interface NormalizedOptions extends Options {
 }
 
 export function normalizeOptions(
-  options: Options | undefined
+  options: Options | undefined,
 ): NormalizedOptions {
   return {
     updateWorkspaceDependencies: options?.updateWorkspaceDependencies ?? true,

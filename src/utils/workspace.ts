@@ -49,7 +49,7 @@ export async function getWorkspace(dir: string): Promise<Workspace> {
 
   return {
     packages: packages.map((pkg) => {
-      const version = new SemVer(pkg.packageJson.version);
+      const version = new SemVer(pkg.packageJson.version ?? "0.0.0");
 
       return {
         name: pkg.packageJson.name,
@@ -66,9 +66,9 @@ export async function getWorkspace(dir: string): Promise<Workspace> {
 
 export async function savePackageConfig(pkg: WorkspacePackage) {
   const text = await readFile(pkg.configPath, "utf-8");
-  const indent = detectIndent(text);
+  const indent = text ? detectIndent(text) : undefined;
   await writeFile(
     pkg.configPath,
-    JSON.stringify(pkg.config, undefined, indent.indent)
+    JSON.stringify(pkg.config, undefined, indent?.indent ?? 2),
   );
 }

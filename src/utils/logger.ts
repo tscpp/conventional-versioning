@@ -78,7 +78,7 @@ export class Logger extends WritableStream<Log> {
   }
 
   createReadableStream(
-    strategy?: QueuingStrategy<Log> | undefined
+    strategy?: QueuingStrategy<Log> | undefined,
   ): ReadableStream<Log> {
     let controller: ReadableStreamController<Log> | undefined;
 
@@ -91,7 +91,7 @@ export class Logger extends WritableStream<Log> {
           this.#controllers.delete(controller!);
         },
       },
-      strategy
+      strategy,
     );
   }
 
@@ -103,10 +103,10 @@ export class Logger extends WritableStream<Log> {
     return this.#write(
       data
         .map((object) =>
-          typeof object === "string" ? object : inspect(object)
+          typeof object === "string" ? object : inspect(object),
         )
         .join(" "),
-      level
+      level,
     );
   }
 

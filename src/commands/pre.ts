@@ -6,6 +6,7 @@ import { spliceValueFromArray } from "../utils/misc.js";
 import { isPreRelease } from "../utils/version.js";
 import { getWorkspace, savePackageConfig } from "../utils/workspace.js";
 import enquirer from "enquirer";
+import isTTY from "../utils/is-tty.js";
 
 export default declareCommand({
   command: ["pre <enter|exit> [pkgs...]"],
@@ -38,20 +39,20 @@ export default declareCommand({
           const workspace = await getWorkspace(args.workspaceDir);
 
           const available = workspace.packages.filter(
-            (pkg) => !isPreRelease(pkg.version)
+            (pkg) => !isPreRelease(pkg.version),
           );
 
           let filter: string[];
           if (args.pkgs.length > 0) {
             filter = args.pkgs;
-          } else if (args.ci) {
+          } else if (args.ci || !isTTY) {
             throw await logger.fatal(
-              "Provide one or more packages to be pre-released."
+              "Provide one or more packages to be pre-released.",
             );
           } else {
             if (available.length === 0) {
               throw await logger.fatal(
-                "No packages are available for pre-release."
+                "No packages are available for pre-release.",
               );
             }
 
@@ -62,6 +63,7 @@ export default declareCommand({
                 name: "filter",
                 type: "multiselect",
                 message: "What packages?",
+                /* eslint-disable */
                 choices: [
                   {
                     name: "All packages",
@@ -73,8 +75,13 @@ export default declareCommand({
                     })),
                   } as any,
                 ],
+                /* eslint-enable */
               })
             ).filter;
+
+            if (filter.length === 0) {
+              return;
+            }
 
             if (filter.includes("All packages")) {
               filter = ["*"];
@@ -87,16 +94,16 @@ export default declareCommand({
 
           if (filter.length === 0) {
             throw await logger.fatal(
-              "No packages are available for pre-release."
+              "No packages are available for pre-release.",
             );
           }
 
           let id: string;
           if (args.id) {
             id = args.id;
-          } else if (args.ci) {
+          } else if (args.ci || !isTTY) {
             throw await logger.fatal(
-              "You must provide a pre-release identifier using the '--id' flag."
+              "You must provide a pre-release identifier using the '--id' flag.",
             );
           } else {
             id = (
@@ -111,9 +118,9 @@ export default declareCommand({
           let tag: string;
           if (args.tag) {
             tag = args.tag;
-          } else if (args.ci) {
+          } else if (args.ci || !isTTY) {
             throw await logger.fatal(
-              "You must provide a tag using the '--tag' flag."
+              "You must provide a tag using the '--tag' flag.",
             );
           } else {
             tag = (
@@ -126,7 +133,7 @@ export default declareCommand({
           }
 
           const packages = workspace.packages.filter((pkg) =>
-            filter.includes(pkg.name)
+            filter.includes(pkg.name),
           );
 
           config.pre ??= {};
@@ -156,10 +163,10 @@ export default declareCommand({
             await writeConfig(configPath, config);
           }
 
-          logger.warn(
-            `Added ${packages.length} package(s) to pre-release on the next versioning.`
+          await logger.warn(
+            `Added ${packages.length} package(s) to pre-release on the next versioning.`,
           );
-        }
+        },
       )
       .command(
         "exit",
@@ -171,20 +178,20 @@ export default declareCommand({
           const workspace = await getWorkspace(args.workspaceDir);
 
           const available = workspace.packages.filter((pkg) =>
-            isPreRelease(pkg.version)
+            isPreRelease(pkg.version),
           );
 
           let filter: string[];
           if (args.pkgs.length > 0) {
             filter = args.pkgs;
-          } else if (args.ci) {
+          } else if (args.ci || !isTTY) {
             throw await logger.fatal(
-              "Provide one or more packages to exit pre-release."
+              "Provide one or more packages to exit pre-release.",
             );
           } else {
             if (available.length === 0) {
               throw await logger.fatal(
-                "No packages are configured to pre-release."
+                "No packages are configured to pre-release.",
               );
             }
 
@@ -195,6 +202,7 @@ export default declareCommand({
                 name: "filter",
                 type: "multiselect",
                 message: "What packages?",
+                /* eslint-disable */
                 choices: [
                   {
                     name: "All packages",
@@ -206,6 +214,7 @@ export default declareCommand({
                     })),
                   } as any,
                 ],
+                /* eslint-enable */
               })
             ).filter;
 
@@ -220,12 +229,12 @@ export default declareCommand({
 
           if (filter.length === 0) {
             throw await logger.fatal(
-              "No packages are configured to pre-release."
+              "No packages are configured to pre-release.",
             );
           }
 
           const packages = workspace.packages.filter((pkg) =>
-            filter.includes(pkg.name)
+            filter.includes(pkg.name),
           );
 
           for (const pkg of packages) {
@@ -267,10 +276,10 @@ export default declareCommand({
             await writeConfig(configPath, config);
           }
 
-          logger.info(
-            `Removed ${packages.length} package(s) from pre-release on the next versioning.`
+          await logger.info(
+            `Removed ${packages.length} package(s) from pre-release on the next versioning.`,
           );
-        }
+        },
       ),
   handler: undefined!,
 });

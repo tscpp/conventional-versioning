@@ -1,6 +1,8 @@
 import { declareCommand } from "../cli.js";
 import { readConfig, writeConfig } from "../utils/config.js";
+import isTTY from "../utils/is-tty.js";
 import logger from "../utils/logger.js";
+import { renderList } from "../utils/tui.js";
 import { formatBump, toBump } from "../utils/version.js";
 import { getWorkspace } from "../utils/workspace.js";
 import enquirer from "enquirer";
@@ -19,6 +21,10 @@ export default declareCommand({
         bump: {
           type: "string",
         },
+        override: {
+          type: "boolean",
+          default: false,
+        },
       }),
   handler: async (args) => {
     const config = await readConfig(args.config);
@@ -27,7 +33,7 @@ export default declareCommand({
     let filter: string[];
     if (args.pkgs.length > 0) {
       filter = args.pkgs;
-    } else if (args.ci) {
+    } else if (args.ci || !isTTY) {
       throw await logger.fatal("Provide one or more packages to be promoted.");
     } else {
       filter = (
@@ -37,6 +43,7 @@ export default declareCommand({
           name: "filter",
           type: "multiselect",
           message: "What packages?",
+          /* eslint-disable */
           choices: [
             {
               name: "All packages",
@@ -48,8 +55,13 @@ export default declareCommand({
               })),
             } as any,
           ],
+          /* eslint-enable */
         })
       ).filter;
+
+      if (filter.length === 0) {
+        return;
+      }
 
       if (filter.includes("All packages")) {
         filter = ["*"];
@@ -65,15 +77,15 @@ export default declareCommand({
     }
 
     const packages = workspace.packages.filter((pkg) =>
-      filter.includes(pkg.name)
+      filter.includes(pkg.name),
     );
 
     let bumpText: string;
     if (args.bump) {
       bumpText = args.bump;
-    } else if (args.ci) {
+    } else if (args.ci || !isTTY) {
       throw await logger.fatal(
-        "Provide the '--bump' flag with a valid version bump."
+        "Provide the '--bump' flag with a valid version bump.",
       );
     } else {
       bumpText = (
@@ -81,7 +93,7 @@ export default declareCommand({
           bump: string;
         }>({
           name: "bump",
-          type: "list",
+          type: "select",
           message: "What bump?",
           choices: [{ name: "patch" }, { name: "minor" }, { name: "major" }],
         })
@@ -92,20 +104,38 @@ export default declareCommand({
     config.pre ??= {};
     config.pre.promote ??= {};
 
+    const conflicts: string[] = [];
+    const updated: string[] = [];
+
     for (const pkg of packages) {
       const current = toBump(config.pre.promote[pkg.name] ?? "none");
 
-      if (bump > current) {
+      if (args.override || bump > current) {
         config.pre.promote[pkg.name] = formatBump(bump);
+        updated.push(pkg.name);
+      } else {
+        conflicts.push(pkg.name);
       }
+    }
+
+    if (conflicts.length > 0) {
+      await logger.warn(
+        "Following packages already have an equal or greater promotion:\n" +
+          renderList(conflicts),
+      );
+    }
+
+    if (updated.length > 0) {
+      await logger.warn(
+        `Following packages recieved '${bumpText}' promotion:\n` +
+          renderList(updated),
+      );
+    } else {
+      await logger.warn("No changes!");
     }
 
     if (!args.dryRun) {
       await writeConfig(args.config, config);
     }
-
-    logger.warn(
-      `Added ${packages.length} package(s) for major promotion on the next versioning.`
-    );
   },
 });

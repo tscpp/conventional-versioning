@@ -13,8 +13,7 @@
     "conver": "node ./dist/bin.js",
     "format": "prettier --write .",
     "lint": "eslint src",
-    "prepare": "husky",
-    "test": "node --test"
+    "prepare": "husky"
   },
   "dependencies": {
     "@manypkg/get-packages": "^2.2.1",

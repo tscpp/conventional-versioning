@@ -40,7 +40,9 @@
     "conver": "node ./dist/bin.js",
     "format": "prettier --write .",
     "lint": "eslint src",
-    "prepare": "husky"
+    "prepare": "husky",
+    "release": "npm run build && npm run version && npm publish",
+    "version": "node ./dist/bin.js version"
   },
   "dependencies": {
     "@manypkg/get-packages": "^2.2.1",

@@ -1,6 +1,6 @@
 {
   "name": "conventional-versioning",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.0",
   "type": "module",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -44,6 +44,9 @@
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.13.0",
     "yargs": "^17.7.2"
+  },
+  "publishConfig": {
+    "tag": "rc"
   },
   "overrides": {
     "eslint": "$eslint"

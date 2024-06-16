@@ -1,0 +1,10 @@
+{
+  "$schema": "./schema.json",
+  "options": {},
+  "pre": {
+    "prerelease": ["conventional-versioning"],
+    "original": {
+      "conventional-versioning": "0.1.0"
+    }
+  }
+}

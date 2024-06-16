@@ -1,11 +1,10 @@
 {
-  "extends": [
-    "@tsconfig/strictest",
-    "@tsconfig/node20"
-  ],
+  "extends": ["@tsconfig/strictest", "@tsconfig/node20"],
   "compilerOptions": {
-    "rootDir": "src"
+    "types": [],
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true
   },
-  "ts-node": {},
   "include": ["src"]
 }

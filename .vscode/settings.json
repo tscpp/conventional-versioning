@@ -1,0 +1,9 @@
+{
+  "eslint.experimental.useFlatConfig": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.spec.ts, ${capture}.test.ts"
+  },
+  "material-icon-theme.files.associations": {
+    "tsconfig.src.json": "tsconfig"
+  }
+}

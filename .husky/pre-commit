@@ -1,0 +1,1 @@
+node ./node_modules/pretty-quick/lib/cli.mjs

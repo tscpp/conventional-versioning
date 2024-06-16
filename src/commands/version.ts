@@ -33,7 +33,6 @@ import { ExecaError } from "execa";
 import { relative } from "node:path";
 import { renderList } from "../utils/tui.js";
 import chalk from "chalk";
-import { spliceValueFromArray } from "../utils/misc.js";
 
 const DEPENDENCY_KEYS = [
   "dependencies",
@@ -80,11 +79,6 @@ export default declareCommand({
         config.base ? renderCommitHash(config.base) : "ever"
       }` + (commits.length ? ":\n" + renderCommitList(commits) : ".")
     );
-
-    if (commits.length === 0 && !args.force) {
-      await logger.info("No commits since last versioning. Exiting.");
-      return;
-    }
 
     // Enter/exit pre-release for all packages.
     await updatePreReleases({ workspace, config });
@@ -325,10 +319,10 @@ async function updateVersion({
 
     let skipMajor = originalVersion.major === 0;
 
-    if (config.pre?.promote?.includes(pkg.name)) {
-      spliceValueFromArray(config.pre.promote, pkg.name);
+    if (config.pre?.promote && Object.hasOwn(config.pre.promote, pkg.name)) {
       skipMajor = false;
-      bump = Bump.Major;
+      bump = toBump(config.pre.promote[pkg.name]!);
+      delete config.pre.promote[pkg.name];
     }
 
     if (bump === Bump.None) {

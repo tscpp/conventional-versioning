@@ -10,7 +10,7 @@ export interface Config {
   base?: string;
   pre?: {
     original?: Record<string, string>;
-    promote?: string[];
+    promote?:  Record<string, string>;
     prerelease?: string[];
   };
   options?: Options;

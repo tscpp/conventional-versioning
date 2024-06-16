@@ -7,6 +7,22 @@ export enum Bump {
   Major,
 }
 
+export function formatBump(bump: Bump): string {
+  switch (bump) {
+    case Bump.None:
+      return "none";
+
+    case Bump.Patch:
+      return "patch";
+
+    case Bump.Minor:
+      return "minor";
+
+    case Bump.Major:
+      return "major";
+  }
+}
+
 export function toBump(value: string): Bump {
   switch (value) {
     case "patch":

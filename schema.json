@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "updateWorkspaceDependencies": {
+          "type": "boolean"
+        },
+        "onlyUpdateWorkspaceProtocol": {
+          "type": "boolean"
+        },
+        "allowOverrideComplexRanges": {
+          "type": "boolean"
+        },
+        "allowUpdateStableToPreRelease": {
+          "type": "boolean"
+        },
+        "warnOutdatedPreReleaseUsage": {
+          "type": "boolean"
+        },
+        "ignoreInvalidCommits": {
+          "type": "boolean"
+        },
+        "releaseTypes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["patch", "minor", "major"]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "base": {
+      "type": "string"
+    },
+    "pre": {
+      "type": "object",
+      "properties": {
+        "original": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "prerelease": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "promote": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "promote": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

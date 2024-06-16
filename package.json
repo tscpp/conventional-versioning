@@ -1,0 +1,25 @@
+{
+  "name": "conventional-versioning",
+  "type": "module",
+  "version": "0.1.0",
+  "dependencies": {
+    "@manypkg/get-packages": "^2.2.1",
+    "conventional-commits-parser": "^6.0.0",
+    "detect-indent": "^7.0.1",
+    "enquirer": "^2.4.1",
+    "execa": "^9.2.0",
+    "is-ci": "^3.0.1",
+    "semver": "^7.6.2"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
+    "@tsconfig/strictest": "^2.0.5",
+    "@types/is-ci": "^3.0.4",
+    "@types/node": "^20.14.2",
+    "@types/semver": "^7.5.8",
+    "@types/yargs": "^17.0.32",
+    "chalk": "^5.3.0",
+    "typescript": "^5.4.5",
+    "yargs": "^17.7.2"
+  }
+}

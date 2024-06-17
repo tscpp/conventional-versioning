@@ -75,7 +75,7 @@
     "yargs": "^17.7.2"
   },
   "publishConfig": {
-    "tag": "rc"
+    "tag": "latest"
   },
   "overrides": {
     "eslint": "$eslint"

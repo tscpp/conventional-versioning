@@ -1,6 +1,6 @@
 {
   "name": "conventional-versioning",
-  "version": "0.2.0-rc.0",
+  "version": "0.2.0-rc.1",
   "description": "Versioning manager for conventional commits.",
   "keywords": [
     "conventional",

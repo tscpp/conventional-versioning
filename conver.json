@@ -7,7 +7,8 @@
     ],
     "original": {
       "conventional-versioning": "0.1.0"
-    }
+    },
+    "promote": {}
   },
-  "base": "52b3dacd630edace94d355aba6f99281c45148af"
+  "base": "84e211727b36be8c4b70cb95d2048fd84288d1ea"
 }

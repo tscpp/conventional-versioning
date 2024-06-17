@@ -9,3 +9,4 @@ export {
   Bump,
 } from "./utils/version.js";
 export { type Workspace, getWorkspace } from "./utils/workspace.js";
+export { default as run } from "./cli.js";

@@ -1,9 +1,9 @@
 import { declareCommand } from "../cli.js";
-import { readConfig, writeConfig } from "../utils/config.js";
+import { Config } from "../utils/config.js";
 import isTTY from "../utils/is-tty.js";
 import logger from "../utils/logger.js";
 import { renderList } from "../utils/tui.js";
-import { formatBump, toBump } from "../utils/version.js";
+import { toBump } from "../utils/version.js";
 import { getWorkspace } from "../utils/workspace.js";
 import enquirer from "enquirer";
 
@@ -27,7 +27,7 @@ export default declareCommand({
         },
       }),
   handler: async (args) => {
-    const config = await readConfig(args.config);
+    const config = await Config.read(args.config);
     const workspace = await getWorkspace(args.workspaceDir);
 
     let filter: string[];
@@ -77,7 +77,7 @@ export default declareCommand({
     }
 
     const packages = workspace.packages.filter((pkg) =>
-      filter.includes(pkg.name),
+      filter.includes(pkg.name)
     );
 
     let bumpText: string;
@@ -85,7 +85,7 @@ export default declareCommand({
       bumpText = args.bump;
     } else if (args.ci || !isTTY) {
       throw await logger.fatal(
-        "Provide the '--bump' flag with a valid version bump.",
+        "Provide the '--bump' flag with a valid version bump."
       );
     } else {
       bumpText = (
@@ -101,17 +101,14 @@ export default declareCommand({
     }
     const bump = toBump(bumpText);
 
-    config.pre ??= {};
-    config.pre.promote ??= {};
-
     const conflicts: string[] = [];
     const updated: string[] = [];
 
     for (const pkg of packages) {
-      const current = toBump(config.pre.promote[pkg.name] ?? "none");
+      const current = config.getPromotion(pkg.name);
 
       if (args.override || bump > current) {
-        config.pre.promote[pkg.name] = formatBump(bump);
+        config.setPromotion(pkg.name, bump);
         updated.push(pkg.name);
       } else {
         conflicts.push(pkg.name);
@@ -121,21 +118,21 @@ export default declareCommand({
     if (conflicts.length > 0) {
       await logger.warn(
         "Following packages already have an equal or greater promotion:\n" +
-          renderList(conflicts),
+          renderList(conflicts)
       );
     }
 
     if (updated.length > 0) {
       await logger.warn(
         `Following packages recieved '${bumpText}' promotion:\n` +
-          renderList(updated),
+          renderList(updated)
       );
     } else {
       await logger.warn("No changes!");
     }
 
     if (!args.dryRun) {
-      await writeConfig(args.config, config);
+      await config.save();
     }
   },
 });

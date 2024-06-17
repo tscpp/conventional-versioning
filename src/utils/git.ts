@@ -2,6 +2,7 @@ import { $ as createScriptMethod } from "execa";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import logger from "./logger.js";
 
 export interface GitLogOptions {
   pattern?: string[] | undefined;
@@ -45,10 +46,11 @@ export async function createGit(directory = "."): Promise<Git> {
   } catch {
     throw new Error("Unable to find git. Is it installed?");
   }
+  await logger.debug("git version:", version.replace("git version ", ""));
 
   if (!existsSync(gitDirectory)) {
     throw new Error(
-      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?",
+      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?"
     );
   }
 

@@ -1,6 +1,8 @@
 import detectIndent from "detect-indent";
 import { readFile, writeFile } from "node:fs/promises";
 import { PACKAGE_NAME } from "./constants.js";
+import { Bump, formatBumpOrUndefined, toBump } from "./version.js";
+import { spliceValueFromArray } from "./misc.js";
 
 const DEFAULT_BUMP_MAP = {
   patch: "patch",
@@ -20,79 +22,161 @@ const DEFAULT_BUMP_MAP = {
   chore: "ignore",
 };
 
-export interface Config {
+export interface ConfigRaw {
   $schema?: string | undefined;
   base?: string | undefined;
   pre?: {
-    original?: Record<string, string> | undefined;
-    promote?: Record<string, string> | undefined;
+    original?: Record<string, string | undefined> | undefined;
+    promote?: Record<string, string | undefined> | undefined;
     prerelease?: string[] | undefined;
   };
-  options?: Options | undefined;
+  options?: OptionsRaw | undefined;
 }
 
-export async function readConfig(path: string): Promise<Config> {
-  let text: string;
-  try {
-    text = await readFile(path, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return {};
-    } else {
-      throw error;
+export class Config {
+  static default: ConfigRaw = {};
+
+  static async read(path: string) {
+    let text: string | undefined;
+    try {
+      text = await readFile(path, "utf8");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+        throw error;
+      }
+    }
+    const raw = text ? (JSON.parse(text) as ConfigRaw) : Config.default;
+    const indent = text ? detectIndent(text).indent : undefined;
+    return new Config(path, raw, indent);
+  }
+
+  #indent: string;
+
+  readonly options: Options;
+
+  protected constructor(
+    readonly path: string,
+    readonly raw: ConfigRaw,
+    indent?: string | undefined
+  ) {
+    this.#indent = indent ?? "  ";
+    this.options = normalizeOptions(this.raw.options);
+  }
+
+  getPromotions(): ReadonlyMap<string, Bump> {
+    const map = new Map<string, Bump>();
+
+    if (this.raw.pre?.promote) {
+      for (const [key, value] of Object.entries(this.raw.pre.promote)) {
+        if (value) {
+          map.set(key, toBump(value));
+        }
+      }
+    }
+
+    return map;
+  }
+
+  getPromotion(name: string): Bump {
+    return toBump(this.raw.pre?.promote?.[name] ?? "none");
+  }
+
+  setPromotion(name: string, value: Bump) {
+    this.raw.pre ??= {};
+    this.raw.pre.promote ??= {};
+    this.raw.pre.promote[name] = formatBumpOrUndefined(value);
+  }
+
+  getOriginalVersions(): ReadonlyMap<string, string> {
+    const map = new Map<string, string>();
+
+    if (this.raw.pre?.original) {
+      for (const [key, value] of Object.entries(this.raw.pre.original)) {
+        if (value) {
+          map.set(key, value);
+        }
+      }
+    }
+
+    return map;
+  }
+
+  getOriginalVersion(name: string): string | undefined {
+    return this.raw.pre?.original?.[name];
+  }
+
+  hasOriginalVersion(name: string) {
+    return !!this.getOriginalVersion(name);
+  }
+
+  setOriginalVersion(name: string, value: string | undefined) {
+    this.raw.pre ??= {};
+    this.raw.pre.original ??= {};
+    this.raw.pre.original[name] = value;
+  }
+
+  isPreRelease(name: string) {
+    return this.raw.pre?.prerelease?.includes(name) ?? false;
+  }
+
+  setPreRelease(name: string, value: boolean) {
+    if (value) {
+      this.raw.pre ??= {};
+      this.raw.pre.prerelease ??= [];
+      if (!this.raw.pre.prerelease.includes(name)) {
+        this.raw.pre.prerelease.push(name);
+      }
+    } else if (this.raw.pre?.prerelease?.includes(name)) {
+      spliceValueFromArray(this.raw.pre.prerelease, name);
     }
   }
 
-  return JSON.parse(text) as Config;
-}
+  getPreReleases(): readonly string[] {
+    return this.raw.pre?.prerelease?.slice() ?? [];
+  }
 
-export async function writeConfig(path: string, config: Config) {
-  let text: string | undefined;
-  try {
-    text = await readFile(path, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      throw error;
+  getBase(): string | undefined {
+    return this.raw.base;
+  }
+
+  setBase(value: string | undefined) {
+    this.raw.base = value;
+  }
+
+  protected cleanup() {
+    this.raw.$schema ??= `${PACKAGE_NAME}/schema.json`;
+    this.raw.options ??= {};
+    if (this.raw.pre) {
+      deleteEmpty(this.raw.pre, ["original", "prerelease", "promote"]);
     }
-  }
-  const indent = text ? detectIndent(text) : undefined;
-  config = cleanupConfig(config);
-  await writeFile(path, JSON.stringify(config, undefined, indent?.indent ?? 2));
-}
+    deleteEmpty(this.raw, ["pre"]);
 
-function cleanupConfig(config: Config) {
-  // Add $schema
-  if (!config.$schema) {
-    config.$schema = `${PACKAGE_NAME}/schema.json`;
-  }
-
-  config.options ??= {};
-
-  // Remove unused.
-  if (config.pre) {
-    deleteEmpty(config.pre, ["original", "prerelease", "promote"]);
-  }
-  deleteEmpty(config, ["pre"]);
-
-  return config;
-
-  function deleteEmpty<T extends object>(object: T, keys: (keyof T)[]) {
-    for (const key of keys) {
-      const value = object[key];
-      if (
-        value === undefined ||
-        (Array.isArray(value) && value.length === 0) ||
-        (typeof value === "object" &&
-          value &&
-          Object.entries(value).length === 0)
-      ) {
-        delete object[key];
+    function deleteEmpty<T extends object>(object: T, keys: (keyof T)[]) {
+      for (const key of keys) {
+        const value = object[key];
+        if (
+          value === undefined ||
+          (Array.isArray(value) && value.length === 0) ||
+          (typeof value === "object" &&
+            value &&
+            Object.entries(value).length === 0)
+        ) {
+          delete object[key];
+        }
       }
     }
   }
+
+  async save() {
+    this.cleanup();
+    await writeFile(
+      this.path,
+      JSON.stringify(this.raw, undefined, this.#indent)
+    );
+  }
 }
 
-export interface Options {
+export interface OptionsRaw {
   updateWorkspaceDependencies?: boolean;
   onlyUpdateWorkspaceProtocol?: boolean;
   allowOverrideComplexRanges?: boolean;
@@ -104,34 +188,36 @@ export interface Options {
   releaseTypes?: Record<string, string>;
 }
 
-export interface NormalizedOptions extends Options {
-  updateWorkspaceDependencies: boolean;
-  onlyUpdateWorkspaceProtocol: boolean;
-  allowOverrideComplexRanges: boolean;
-  allowUpdateStableToPreRelease: boolean;
-  warnOutdatedPreReleaseUsage: boolean;
-  ignoreInvalidCommits: boolean;
-  initialPreReleaseVersion: number;
-  preservePreRelaseSequence: boolean;
-  releaseTypes: Record<string, string>;
+export interface Options extends OptionsRaw {
+  readonly raw: OptionsRaw;
+  readonly updateWorkspaceDependencies: boolean;
+  readonly onlyUpdateWorkspaceProtocol: boolean;
+  readonly allowOverrideComplexRanges: boolean;
+  readonly allowUpdateStableToPreRelease: boolean;
+  readonly warnOutdatedPreReleaseUsage: boolean;
+  readonly ignoreInvalidCommits: boolean;
+  readonly initialPreReleaseVersion: number;
+  readonly preservePreRelaseSequence: boolean;
+  readonly releaseTypes: Record<string, string>;
 }
 
-export function normalizeOptions(
-  options: Options | undefined
-): NormalizedOptions {
+function normalizeOptions(options: OptionsRaw | undefined): Options {
+  options ??= {};
+
   return {
-    updateWorkspaceDependencies: options?.updateWorkspaceDependencies ?? true,
-    onlyUpdateWorkspaceProtocol: options?.onlyUpdateWorkspaceProtocol ?? false,
-    allowOverrideComplexRanges: options?.allowOverrideComplexRanges ?? false,
+    raw: options,
+    updateWorkspaceDependencies: options.updateWorkspaceDependencies ?? true,
+    onlyUpdateWorkspaceProtocol: options.onlyUpdateWorkspaceProtocol ?? false,
+    allowOverrideComplexRanges: options.allowOverrideComplexRanges ?? false,
     allowUpdateStableToPreRelease:
-      options?.allowUpdateStableToPreRelease ?? false,
-    warnOutdatedPreReleaseUsage: options?.warnOutdatedPreReleaseUsage ?? true,
-    ignoreInvalidCommits: options?.ignoreInvalidCommits ?? false,
-    initialPreReleaseVersion: options?.initialPreReleaseVersion ?? 0,
-    preservePreRelaseSequence: options?.preservePreRelaseSequence ?? false,
+      options.allowUpdateStableToPreRelease ?? false,
+    warnOutdatedPreReleaseUsage: options.warnOutdatedPreReleaseUsage ?? true,
+    ignoreInvalidCommits: options.ignoreInvalidCommits ?? false,
+    initialPreReleaseVersion: options.initialPreReleaseVersion ?? 0,
+    preservePreRelaseSequence: options.preservePreRelaseSequence ?? false,
     releaseTypes: {
       ...DEFAULT_BUMP_MAP,
-      ...options?.releaseTypes,
+      ...options.releaseTypes,
     },
   };
 }

@@ -13,6 +13,7 @@ import pre from "./commands/pre.js";
 import promote from "./commands/promote.js";
 import version from "./commands/version.js";
 import init from "./commands/init.js";
+import status from "./commands/status.js";
 
 function createCLI(argv: string[]) {
   const cli = yargs(argv) //
@@ -20,7 +21,7 @@ function createCLI(argv: string[]) {
     .scriptName(SCRIPT_NAME)
     .env(ENV_PREFIX)
     .epilog(
-      `Tip! You can also pass any flag using the environment variable prefix "${ENV_PREFIX}" and screaming snake case.`,
+      `Tip! You can also pass any flag using the environment variable prefix "${ENV_PREFIX}" and screaming snake case.`
     )
     .options({
       logLevel: {
@@ -39,6 +40,10 @@ function createCLI(argv: string[]) {
       workspaceDir: {
         type: "string",
         alias: "w",
+        default: "./",
+      },
+      rootDir: {
+        type: "string",
         default: "./",
       },
       config: {
@@ -65,7 +70,7 @@ function createCLI(argv: string[]) {
       cli.showHelpOnFail(false);
 
       const logLevel = toLogLevel(
-        args.logLevel || (args.verbose && "verbose") || "info",
+        args.logLevel || (args.verbose && "verbose") || "info"
       );
 
       // Pipe logger to console
@@ -85,13 +90,13 @@ function createCLI(argv: string[]) {
 
       if (args.force) {
         await logger.warn(
-          "Skipping checks since '--force' flag was passed. This may be destructive!",
+          "Skipping checks since '--force' flag was passed. This may be destructive!"
         );
       }
 
       if (args.dryRun) {
         await logger.warn(
-          "No changes will be made since '--dry-run' flag was passed.",
+          "No changes will be made since '--dry-run' flag was passed."
         );
       }
     })
@@ -109,13 +114,14 @@ function injectCommands(cli: ReturnType<typeof createCLI>) {
   cli.command(init);
   cli.command(pre);
   cli.command(promote);
+  cli.command(status);
   cli.command(version);
 }
 
 type CLI = ReturnType<typeof createCLI> extends Argv<infer T> ? T : never;
 
 export function declareCommand<T>(
-  commandModule: CommandModule<CLI, T>,
+  commandModule: CommandModule<CLI, T>
 ): CommandModule<CLI, T> {
   return commandModule;
 }

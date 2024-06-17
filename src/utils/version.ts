@@ -212,20 +212,19 @@ export async function createVersioningPlan({
     const releaseType = toReleaseType(bump, skipMajor);
     if (releaseType) {
       newVersion = originalVersion.inc(releaseType);
+      newVersion.prerelease = currentVersion.prerelease;
 
       if (isPreRelease(currentVersion)) {
-        newVersion.prerelease = currentVersion.prerelease;
-      }
+        const noMainBump = currentVersion.compareMain(newVersion) >= 0;
+        if (noMainBump) {
+          newVersion = new SemVer(currentVersion.format());
+        }
 
-      const equalStableVersion =
-        currentVersion.patch === newVersion.patch &&
-        currentVersion.minor === newVersion.minor &&
-        currentVersion.major === newVersion.major;
-
-      if (equalStableVersion || config.options.preservePreRelaseSequence) {
-        incrementPreRelease(newVersion);
-      } else {
-        resetPreRelease(newVersion, config.options.initialPreReleaseVersion);
+        if (noMainBump || config.options.preservePreRelaseSequence) {
+          incrementPreRelease(newVersion);
+        } else {
+          resetPreRelease(newVersion, config.options.initialPreReleaseVersion);
+        }
       }
 
       await logger.debug(

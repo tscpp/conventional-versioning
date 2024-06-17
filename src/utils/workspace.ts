@@ -3,6 +3,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { SemVer } from "semver";
 import detectIndent from "detect-indent";
+import { Config } from "./config.js";
+import escapeStringRegexp from "escape-string-regexp";
 
 export interface WorkspacePackageConfig {
   [key: string]: unknown;
@@ -44,24 +46,47 @@ export interface Workspace {
   rootDir: string;
 }
 
-export async function getWorkspace(dir: string): Promise<Workspace> {
-  const { packages, rootDir } = await getPackages(dir);
+export async function getWorkspace({
+  directory,
+  config,
+}: {
+  directory: string;
+  config: Config;
+}): Promise<Workspace> {
+  const { packages, rootDir } = await getPackages(directory);
+
+  const include = config.options.include?.map(patternToRegex);
+  const exclude = config.options.exclude?.map(patternToRegex);
 
   return {
-    packages: packages.map((pkg) => {
-      const version = new SemVer(pkg.packageJson.version ?? "0.0.0");
+    packages: packages
+      .map((pkg) => {
+        const version = new SemVer(pkg.packageJson.version ?? "0.0.0");
 
-      return {
-        name: pkg.packageJson.name,
-        version,
-        config: pkg.packageJson as WorkspacePackageConfig,
-        configPath: join(pkg.dir, "package.json"),
-        dir: pkg.dir,
-        relativeDir: pkg.relativeDir,
-      };
-    }),
+        return {
+          name: pkg.packageJson.name,
+          version,
+          config: pkg.packageJson as WorkspacePackageConfig,
+          configPath: join(pkg.dir, "package.json"),
+          dir: pkg.dir,
+          relativeDir: pkg.relativeDir,
+        };
+      })
+      .filter((pkg) => {
+        return (
+          (!pkg.config.private || config.options.includePrivatePackages) &&
+          (!include || include.some((regex) => regex.test(pkg.name))) &&
+          (!exclude || exclude.every((regex) => !regex.test(pkg.name)))
+        );
+      }),
     rootDir,
   };
+}
+
+function patternToRegex(pattern: string) {
+  return new RegExp(
+    "^" + escapeStringRegexp(pattern).replaceAll("\\*", ".+") + "$"
+  );
 }
 
 export async function savePackageConfig(pkg: WorkspacePackage) {
@@ -69,6 +94,6 @@ export async function savePackageConfig(pkg: WorkspacePackage) {
   const indent = text ? detectIndent(text) : undefined;
   await writeFile(
     pkg.configPath,
-    JSON.stringify(pkg.config, undefined, indent?.indent ?? 2),
+    JSON.stringify(pkg.config, undefined, indent?.indent ?? 2)
   );
 }

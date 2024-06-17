@@ -185,7 +185,12 @@ export interface OptionsRaw {
   ignoreInvalidCommits?: boolean;
   initialPreReleaseVersion?: number;
   preservePreRelaseSequence?: boolean;
+  includePrivatePackages?: boolean;
   releaseTypes?: Record<string, string>;
+  include?: string[] | undefined;
+  exclude?: string[] | undefined;
+  linked?: string[][] | undefined;
+  fixed?: string[][] | undefined;
 }
 
 export interface Options extends OptionsRaw {
@@ -198,7 +203,12 @@ export interface Options extends OptionsRaw {
   readonly ignoreInvalidCommits: boolean;
   readonly initialPreReleaseVersion: number;
   readonly preservePreRelaseSequence: boolean;
+  readonly includePrivatePackages: boolean;
   readonly releaseTypes: Record<string, string>;
+  readonly include: string[] | undefined;
+  readonly exclude: string[] | undefined;
+  readonly linked: string[][];
+  readonly fixed: string[][];
 }
 
 function normalizeOptions(options: OptionsRaw | undefined): Options {
@@ -215,9 +225,14 @@ function normalizeOptions(options: OptionsRaw | undefined): Options {
     ignoreInvalidCommits: options.ignoreInvalidCommits ?? false,
     initialPreReleaseVersion: options.initialPreReleaseVersion ?? 0,
     preservePreRelaseSequence: options.preservePreRelaseSequence ?? false,
+    includePrivatePackages: options.includePrivatePackages ?? false,
     releaseTypes: {
       ...DEFAULT_BUMP_MAP,
       ...options.releaseTypes,
     },
+    include: options.include,
+    exclude: options.exclude,
+    linked: options.linked ?? [],
+    fixed: options.fixed ?? [],
   };
 }

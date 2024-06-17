@@ -14,7 +14,10 @@ export default declareCommand({
   builder: (cli) => cli,
   handler: async (args) => {
     const config = await Config.read(args.config);
-    const workspace = await getWorkspace(args.workspaceDir);
+    const workspace = await getWorkspace({
+      directory: args.workspaceDir,
+      config,
+    });
     const git = await createGit(args.rootDir);
     const commits = await getCommits({ git, config });
     const promitions = config.getPromotions();

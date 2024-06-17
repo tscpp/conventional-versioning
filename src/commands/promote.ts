@@ -28,7 +28,10 @@ export default declareCommand({
       }),
   handler: async (args) => {
     const config = await Config.read(args.config);
-    const workspace = await getWorkspace(args.workspaceDir);
+    const workspace = await getWorkspace({
+      directory: args.workspaceDir,
+      config,
+    });
 
     let filter: string[];
     if (args.pkgs.length > 0) {

@@ -1,9 +1,10 @@
 import { ReleaseType, SemVer } from "semver";
-import { Workspace } from "./workspace.js";
+import { Workspace, WorkspacePackage } from "./workspace.js";
 import { DEPENDENCY_KEYS, hasDependency } from "./dependency.js";
 import { Commit } from "./commit.js";
 import { Config } from "./config.js";
 import logger from "./logger.js";
+import { containsPath } from "./misc.js";
 
 export enum Bump {
   None,
@@ -134,69 +135,65 @@ export async function createVersioningPlan({
   config: Config;
   includeUnchanged?: boolean;
 }): Promise<Versioning[]> {
-  const pkgBumpMap = new Map<string, Bump>();
+  const bumps = new Map<WorkspacePackage, Bump>();
 
-  // Sort by workspace dependencies
-  workspace.packages = workspace.packages
+  for (const pkg of workspace.packages) {
+    const inferred = await inferBumpFromCommits({
+      commits,
+      config,
+      package: pkg,
+    });
+    const promotion = config.getPromotion(pkg.name);
+    config.setPromotion(pkg.name, Bump.None);
+    const bump = Math.max(inferred, promotion);
+    bumps.set(pkg, bump);
+  }
+
+  const sortedPackages = workspace.packages
     .slice()
     .sort((a, b) => (hasDependency(a, b.name) ? 1 : -1));
 
-  for (const pkg of workspace.packages) {
-    let bump = Bump.None;
+  let changes = false;
+  do {
+    for (const ourPackage of sortedPackages) {
+      for (const dependencyKey of DEPENDENCY_KEYS) {
+        const dependencies = ourPackage.config[dependencyKey];
+        if (!dependencies) continue;
 
-    for (const detail of commits) {
-      if (!detail.cc.type) {
-        continue;
-      }
+        const ourBump = bumps.get(ourPackage)!;
 
-      const bumpLike = config.options.releaseTypes[detail.cc.type];
-      if (!bumpLike) {
-        await logger.warn(
-          `Did not recognize CC commit type "${detail.cc.type}". Add it to the 'bump' record in the config.`
-        );
-      }
+        for (const name of Object.keys(dependencies)) {
+          const theirPackage = workspace.packages.find(
+            (pkg) => pkg.name === name
+          )!;
+          const theirBump = bumps.get(theirPackage)!;
 
-      const currentBump = toBump(bumpLike ?? "ignore");
-      if (currentBump > bump) {
-        bump = currentBump;
-      }
-    }
+          if (
+            dependencyKey === "peerDependencies" &&
+            theirBump >= Bump.Minor &&
+            ourBump < Bump.Major
+          ) {
+            bumps.set(ourPackage, Bump.Major);
+            changes = true;
+          }
 
-    for (const dependencyKey of DEPENDENCY_KEYS) {
-      const dependencies = pkg.config[dependencyKey];
-      if (!dependencies) {
-        continue;
-      }
-
-      for (const name of Object.keys(dependencies)) {
-        // Check if internal package.
-        const pkg = workspace.packages.find((pkg) => pkg.name === name)!;
-        if (!pkg) {
-          continue;
-        }
-
-        const theirBump = pkgBumpMap.get(name);
-        if (!theirBump) {
-          continue;
-        }
-
-        if (dependencyKey === "peerDependencies" && theirBump >= Bump.Minor) {
-          bump = Bump.Major;
-        }
-
-        if (theirBump >= Bump.Patch) {
-          bump = Math.max(bump, Bump.Patch);
+          if (theirBump >= Bump.Patch && ourBump < Bump.Patch) {
+            bumps.set(ourPackage, Bump.Patch);
+            changes = true;
+          }
         }
       }
     }
+  } while (changes);
 
-    pkgBumpMap.set(pkg.name, bump);
-  }
+  const versioning: Versioning[] = [];
 
-  const updates: Versioning[] = [];
+  for (const [pkg, bump] of bumps) {
+    if (bump === Bump.None && !includeUnchanged) {
+      continue;
+    }
 
-  for (const pkg of workspace.packages) {
-    let bump = pkgBumpMap.get(pkg.name) ?? Bump.None;
+    const skipMajor = config.getPromotion(pkg.name) !== Bump.Major;
 
     let originalVersion = isPreRelease(pkg.version)
       ? config.getOriginalVersion(pkg.name)
@@ -209,19 +206,12 @@ export async function createVersioningPlan({
     }
     originalVersion = new SemVer(originalVersion);
 
-    let skipMajor = originalVersion.major === 0;
-
-    const promotion = config.getPromotion(pkg.name);
-    if (promotion > Bump.None) {
-      skipMajor = false;
-      bump = promotion;
-      config.setPromotion(pkg.name, Bump.None);
-    }
+    const currentVersion = new SemVer(pkg.version.format());
+    let newVersion = currentVersion;
 
     const releaseType = toReleaseType(bump, skipMajor);
     if (releaseType) {
-      const currentVersion = new SemVer(pkg.version.format());
-      const newVersion = originalVersion.inc(releaseType);
+      newVersion = originalVersion.inc(releaseType);
 
       if (isPreRelease(currentVersion)) {
         newVersion.prerelease = currentVersion.prerelease;
@@ -243,23 +233,53 @@ export async function createVersioningPlan({
           pkg.name
         }' version '${currentVersion.format()}' with '${releaseType}' results in '${newVersion.format()}'.`
       );
-
-      // Push update
-      updates.push({
-        name: pkg.name,
-        oldVersion: currentVersion.format(),
-        newVersion: newVersion.format(),
-        bump,
-      });
-    } else if (includeUnchanged) {
-      updates.push({
-        name: pkg.name,
-        oldVersion: pkg.version.format(),
-        newVersion: pkg.version.format(),
-        bump,
-      });
     }
+
+    versioning.push({
+      name: pkg.name,
+      oldVersion: currentVersion.format(),
+      newVersion: newVersion.format(),
+      bump,
+    });
   }
 
-  return updates;
+  return versioning;
+}
+
+async function inferBumpFromCommits({
+  commits,
+  config,
+  package: pkg,
+}: {
+  commits: Commit[];
+  config: Config;
+  package: WorkspacePackage;
+}) {
+  let bump = Bump.None;
+
+  for (const detail of commits) {
+    if (!detail.cc.type) {
+      continue;
+    }
+
+    const affected = commits
+      .flatMap((commit) => commit.diff)
+      .some((status) => containsPath(pkg.dir, status.filename));
+
+    if (!affected) {
+      continue;
+    }
+
+    const bumpLike = config.options.releaseTypes[detail.cc.type];
+    if (!bumpLike) {
+      await logger.warn(
+        `Did not recognize CC commit type "${detail.cc.type}". Add it to the 'bump' record in the config.`
+      );
+    }
+
+    const currentBump = toBump(bumpLike ?? "ignore");
+    bump = Math.max(bump, currentBump);
+  }
+
+  return bump;
 }

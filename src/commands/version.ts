@@ -38,7 +38,10 @@ export default declareCommand({
     await logger.debug("config:", config.raw);
     await logger.debug("options:", config.options.raw);
 
-    const workspace = await getWorkspace(args.workspaceDir);
+    const workspace = await getWorkspace({
+      directory: args.workspaceDir,
+      config,
+    });
     await logger.verbose(
       `Found ${workspace.packages.length} package(s) in workspace.`
     );

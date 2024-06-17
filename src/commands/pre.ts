@@ -34,7 +34,10 @@ export default declareCommand({
         async (args) => {
           const configPath = args.config;
           const config = await Config.read(configPath);
-          const workspace = await getWorkspace(args.workspaceDir);
+          const workspace = await getWorkspace({
+            directory: args.workspaceDir,
+            config,
+          });
 
           const available = workspace.packages.filter(
             (pkg) => !isPreRelease(pkg.version)
@@ -170,7 +173,10 @@ export default declareCommand({
         async (args) => {
           const configPath = args.config;
           const config = await Config.read(configPath);
-          const workspace = await getWorkspace(args.workspaceDir);
+          const workspace = await getWorkspace({
+            directory: args.workspaceDir,
+            config,
+          });
 
           const available = workspace.packages.filter((pkg) =>
             isPreRelease(pkg.version)

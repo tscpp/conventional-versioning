@@ -3,9 +3,11 @@ import { Commit } from "./commit.js";
 import { Bump, Versioning } from "./version.js";
 
 export function renderList(items: Iterable<string>): string {
-  return Array.from(items)
-    .map((item) => "  " + chalk.dim("*") + " " + item)
-    .join("\n");
+  const array = Array.from(items);
+  if (array.length === 0) {
+    return chalk.dim("  * empty list *");
+  }
+  return array.map((item) => "  " + chalk.dim("*") + " " + item).join("\n");
 }
 
 export function renderTable(rows: string[][]): string {

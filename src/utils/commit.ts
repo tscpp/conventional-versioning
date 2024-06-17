@@ -48,11 +48,11 @@ export async function getCommits({
       if (
         error instanceof ExecaError &&
         (error.stderr! as string)?.includes(
-          "unknown revision or path not in the working tree"
+          "unknown revision or path not in the working tree",
         )
       ) {
         await logger.verbose(
-          `Found first ever commit [${commit.hash.slice(0, 7)}]!`
+          `Found first ever commit [${commit.hash.slice(0, 7)}]!`,
         );
         diff = [];
       } else {
@@ -72,7 +72,7 @@ export async function getCommits({
     if (invalid.length > 0) {
       await logger.warn(
         `Found ${invalid.length} invalid conventional commit summary(s):\n` +
-          renderCommitList(invalid)
+          renderCommitList(invalid),
       );
     }
   }

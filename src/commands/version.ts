@@ -43,7 +43,7 @@ export default declareCommand({
       config,
     });
     await logger.verbose(
-      `Found ${workspace.packages.length} package(s) in workspace.`
+      `Found ${workspace.packages.length} package(s) in workspace.`,
     );
 
     const git = await createGit(args.rootDir);
@@ -51,7 +51,7 @@ export default declareCommand({
     const base = config.getBase();
     if (!base) {
       await logger.debug(
-        "No 'base' property was set in config. Treating as first versioning ever."
+        "No 'base' property was set in config. Treating as first versioning ever.",
       );
     }
 
@@ -61,7 +61,7 @@ export default declareCommand({
     await logger.debug(
       `${commits.length} commits since ${
         base ? renderCommitHash(base) : "ever"
-      }` + (commits.length ? ":\n" + renderCommitList(commits) : ".")
+      }` + (commits.length ? ":\n" + renderCommitList(commits) : "."),
     );
 
     // Enter/exit pre-release for all packages.
@@ -115,19 +115,19 @@ async function updatePreReleases({
 
       if (!isPreRelease(pkg.version)) {
         await logger.fatal(
-          statement + ", but has a stable version configured." + hint
+          statement + ", but has a stable version configured." + hint,
         );
       }
 
       if (!config.hasOriginalVersion(pkg.name)) {
         await logger.fatal(
-          statement + ", but has not an original version configured. " + hint
+          statement + ", but has not an original version configured. " + hint,
         );
       }
 
       if (!pkg.config.publishConfig?.tag) {
         await logger.fatal(
-          statement + ", but has not configured a release tag. " + hint
+          statement + ", but has not configured a release tag. " + hint,
         );
       }
     } else if (isPreRelease(pkg.version)) {
@@ -160,7 +160,7 @@ async function updateVersion({
 
   if (updates.length > 0) {
     await logger.info(
-      chalk.underline("Updated versions:") + "\n" + renderVersioning(updates)
+      chalk.underline("Updated versions:") + "\n" + renderVersioning(updates),
     );
   } else {
     await logger.info("No updates were made!");
@@ -187,7 +187,7 @@ async function updateDependencies({
 
         // Check if internal package.
         const dependencyPackage = workspace.packages.find(
-          (pkg) => pkg.name === name
+          (pkg) => pkg.name === name,
         )!;
         if (!dependencyPackage) {
           continue;
@@ -257,7 +257,7 @@ async function updateDependencies({
           if (allowsPreRelease) {
             if (config.options.warnOutdatedPreReleaseUsage) {
               await logger.warn(
-                `In '${ourPackage.configPath}', dependency "${name}" is set to a pre-release, even though a newer stable version is available.`
+                `In '${ourPackage.configPath}', dependency "${name}" is set to a pre-release, even though a newer stable version is available.`,
               );
             }
             continue;

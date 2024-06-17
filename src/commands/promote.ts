@@ -80,7 +80,7 @@ export default declareCommand({
     }
 
     const packages = workspace.packages.filter((pkg) =>
-      filter.includes(pkg.name)
+      filter.includes(pkg.name),
     );
 
     let bumpText: string;
@@ -88,7 +88,7 @@ export default declareCommand({
       bumpText = args.bump;
     } else if (args.ci || !isTTY) {
       throw await logger.fatal(
-        "Provide the '--bump' flag with a valid version bump."
+        "Provide the '--bump' flag with a valid version bump.",
       );
     } else {
       bumpText = (
@@ -121,14 +121,14 @@ export default declareCommand({
     if (conflicts.length > 0) {
       await logger.warn(
         "Following packages already have an equal or greater promotion:\n" +
-          renderList(conflicts)
+          renderList(conflicts),
       );
     }
 
     if (updated.length > 0) {
       await logger.warn(
         `Following packages recieved '${bumpText}' promotion:\n` +
-          renderList(updated)
+          renderList(updated),
       );
     } else {
       await logger.warn("No changes!");

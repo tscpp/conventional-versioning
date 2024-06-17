@@ -3,8 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { SemVer } from "semver";
 import detectIndent from "detect-indent";
-import { Config } from "./config.js";
-import escapeStringRegexp from "escape-string-regexp";
+import { Config, patternToRegex } from "./config.js";
 
 export interface WorkspacePackageConfig {
   [key: string]: unknown;
@@ -83,17 +82,11 @@ export async function getWorkspace({
   };
 }
 
-function patternToRegex(pattern: string) {
-  return new RegExp(
-    "^" + escapeStringRegexp(pattern).replaceAll("\\*", ".+") + "$"
-  );
-}
-
 export async function savePackageConfig(pkg: WorkspacePackage) {
   const text = await readFile(pkg.configPath, "utf-8");
   const indent = text ? detectIndent(text) : undefined;
   await writeFile(
     pkg.configPath,
-    JSON.stringify(pkg.config, undefined, indent?.indent ?? 2)
+    JSON.stringify(pkg.config, undefined, indent?.indent ?? 2),
   );
 }

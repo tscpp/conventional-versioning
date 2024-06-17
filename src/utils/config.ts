@@ -3,6 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { PACKAGE_NAME } from "./constants.js";
 import { Bump, formatBumpOrUndefined, toBump } from "./version.js";
 import { spliceValueFromArray } from "./misc.js";
+import escapeStringRegexp from "escape-string-regexp";
 
 const DEFAULT_BUMP_MAP = {
   patch: "patch",
@@ -57,7 +58,7 @@ export class Config {
   protected constructor(
     readonly path: string,
     readonly raw: ConfigRaw,
-    indent?: string | undefined
+    indent?: string | undefined,
   ) {
     this.#indent = indent ?? "  ";
     this.options = normalizeOptions(this.raw.options);
@@ -171,9 +172,15 @@ export class Config {
     this.cleanup();
     await writeFile(
       this.path,
-      JSON.stringify(this.raw, undefined, this.#indent)
+      JSON.stringify(this.raw, undefined, this.#indent),
     );
   }
+}
+
+export function patternToRegex(pattern: string) {
+  return new RegExp(
+    "^" + escapeStringRegexp(pattern).replaceAll("\\*", ".+") + "$",
+  );
 }
 
 export interface OptionsRaw {

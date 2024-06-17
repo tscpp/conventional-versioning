@@ -50,7 +50,7 @@ export async function createGit(directory = "."): Promise<Git> {
 
   if (!existsSync(gitDirectory)) {
     throw new Error(
-      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?"
+      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?",
     );
   }
 

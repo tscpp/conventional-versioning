@@ -38,8 +38,8 @@ export default declareCommand({
             config.isPreRelease(pkg.name)
               ? chalk.yellow("(pre-release)")
               : chalk.dim("(stable)"),
-          ])
-        )
+          ]),
+        ),
     );
     process.stdout.write("\n");
 
@@ -51,13 +51,13 @@ export default declareCommand({
             chalk.cyan(name),
             chalk.dim("@"),
             renderBump(bump),
-          ])
-        )
+          ]),
+        ),
     );
     process.stdout.write("\n");
 
     await logger.info(
-      chalk.underline("Next versioning:") + "\n" + renderVersioning(versioning)
+      chalk.underline("Next versioning:") + "\n" + renderVersioning(versioning),
     );
     process.stdout.write("\n");
   },

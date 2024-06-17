@@ -21,7 +21,7 @@ function createCLI(argv: string[]) {
     .scriptName(SCRIPT_NAME)
     .env(ENV_PREFIX)
     .epilog(
-      `Tip! You can also pass any flag using the environment variable prefix "${ENV_PREFIX}" and screaming snake case.`
+      `Tip! You can also pass any flag using the environment variable prefix "${ENV_PREFIX}" and screaming snake case.`,
     )
     .options({
       logLevel: {
@@ -70,7 +70,7 @@ function createCLI(argv: string[]) {
       cli.showHelpOnFail(false);
 
       const logLevel = toLogLevel(
-        args.logLevel || (args.verbose && "verbose") || "info"
+        args.logLevel || (args.verbose && "verbose") || "info",
       );
 
       // Pipe logger to console
@@ -90,13 +90,13 @@ function createCLI(argv: string[]) {
 
       if (args.force) {
         await logger.warn(
-          "Skipping checks since '--force' flag was passed. This may be destructive!"
+          "Skipping checks since '--force' flag was passed. This may be destructive!",
         );
       }
 
       if (args.dryRun) {
         await logger.warn(
-          "No changes will be made since '--dry-run' flag was passed."
+          "No changes will be made since '--dry-run' flag was passed.",
         );
       }
     })
@@ -121,7 +121,7 @@ function injectCommands(cli: ReturnType<typeof createCLI>) {
 type CLI = ReturnType<typeof createCLI> extends Argv<infer T> ? T : never;
 
 export function declareCommand<T>(
-  commandModule: CommandModule<CLI, T>
+  commandModule: CommandModule<CLI, T>,
 ): CommandModule<CLI, T> {
   return commandModule;
 }

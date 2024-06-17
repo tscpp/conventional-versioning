@@ -23,11 +23,50 @@
         "ignoreInvalidCommits": {
           "type": "boolean"
         },
+        "initialPreReleaseVersion": {
+          "type": "boolean"
+        },
+        "preservePreRelaseSequence": {
+          "type": "boolean"
+        },
+        "includePrivatePackages": {
+          "type": "boolean"
+        },
         "releaseTypes": {
           "type": "object",
           "additionalProperties": {
             "type": "string",
             "enum": ["patch", "minor", "major"]
+          }
+        },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "linked": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "fixed": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

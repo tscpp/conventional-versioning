@@ -1,5 +1,8 @@
 # Convetional Versioning
 
+[![NPM Version](https://img.shields.io/npm/v/conventional-versioning)](https://npmjs.com/package/conventional-versioning)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tscpp/conventional-versioning/checks.yml)
+
 ## Introduction
 
 Conventional Versioning is a library designed to simplify the versioning of packages, particularly in larger monorepo setups. It uses [conventional commits] to detect new versions for packages automatically but also supports manual version promotion if needed. As expected, it adheres to [semantic versioning] (semver).

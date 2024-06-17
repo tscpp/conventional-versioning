@@ -8,9 +8,6 @@
     "options": {
       "type": "object",
       "properties": {
-        "updateWorkspaceDependencies": {
-          "type": "boolean"
-        },
         "onlyUpdateWorkspaceProtocol": {
           "type": "boolean"
         },

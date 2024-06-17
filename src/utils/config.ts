@@ -184,7 +184,6 @@ export function patternToRegex(pattern: string) {
 }
 
 export interface OptionsRaw {
-  updateWorkspaceDependencies?: boolean;
   onlyUpdateWorkspaceProtocol?: boolean;
   allowOverrideComplexRanges?: boolean;
   allowUpdateStableToPreRelease?: boolean;
@@ -202,7 +201,6 @@ export interface OptionsRaw {
 
 export interface Options extends OptionsRaw {
   readonly raw: OptionsRaw;
-  readonly updateWorkspaceDependencies: boolean;
   readonly onlyUpdateWorkspaceProtocol: boolean;
   readonly allowOverrideComplexRanges: boolean;
   readonly allowUpdateStableToPreRelease: boolean;
@@ -223,7 +221,6 @@ function normalizeOptions(options: OptionsRaw | undefined): Options {
 
   return {
     raw: options,
-    updateWorkspaceDependencies: options.updateWorkspaceDependencies ?? true,
     onlyUpdateWorkspaceProtocol: options.onlyUpdateWorkspaceProtocol ?? false,
     allowOverrideComplexRanges: options.allowOverrideComplexRanges ?? false,
     allowUpdateStableToPreRelease:

@@ -108,8 +108,6 @@ You can specify which packages or patterns of packages to include or exclude fro
 
 ### Options
 
-- **updateWorkspaceDependencies**: Update the versions of dependencies within internal packages. Default: `true`.
-
 - **onlyUpdateWorkspaceProtocol**: Restrict version updates to those using the workspace protocol. Default: `false`.
 
 - **allowOverrideComplexRanges**: Override complex version ranges with the new version when the specified range cannot be detected. Default: `false`.

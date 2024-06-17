@@ -213,6 +213,12 @@ npx conver version
 
 The CLI will automatically detect common CI platforms, and when TTY is not available. However, you can also choose to specify the `--ci` flag or `CONVER_CI=true` environment variable. In CI mode, the CLI will never prompt any questions and requires all options to be passed via flags or environment variables instead.
 
+## FAQ
+
+**Q: Why is a minor bump in my dependency causing a major bump in the parent package?**
+
+A: Due to the nature of peer dependencies, even a minor version increase in one can lead to a breaking change. Consequently, any such update will provoke a major version increment in the parent package. See [discussion #2](https://github.com/tscpp/conventional-versioning/discussions/2) for detailed explanation.
+
 ## Questions
 
 Feel free to drop any questions in a new [discussion](https://github.com/tscpp/conventional-versioning/discussions) in the repository.

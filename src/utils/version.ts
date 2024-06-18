@@ -69,7 +69,7 @@ export function toBump(value: string | Bump): Bump {
 
 export function toReleaseType(
   bump: Bump,
-  skipMajor: boolean,
+  skipMajor: boolean
 ): ReleaseType | null {
   if (skipMajor) {
     bump = Math.min(bump, Bump.Minor);
@@ -169,7 +169,7 @@ export async function createVersioningPlan({
 
         for (const name of Object.keys(dependencies)) {
           const theirPackage = workspace.packages.find(
-            (pkg) => pkg.name === name,
+            (pkg) => pkg.name === name
           )!;
           const theirBump = bumps.get(theirPackage)!;
 
@@ -200,14 +200,14 @@ export async function createVersioningPlan({
       for (const patterns of relations) {
         const included = patterns.flatMap((pattern) =>
           workspace.packages.filter((pkg) =>
-            patternToRegex(pattern).test(pkg.name),
-          ),
+            patternToRegex(pattern).test(pkg.name)
+          )
         );
 
         if (included.length === 0) {
           await logger.warn(
             `Following patterns specified in the "${type}" option matches no packages:\n` +
-              renderList(patterns),
+              renderList(patterns)
           );
         }
 
@@ -235,14 +235,10 @@ export async function createVersioningPlan({
           if (greatest.major > pkg.version.major) {
             pkg.version.inc("major");
             repeat = true;
-          }
-
-          if (greatest.minor > pkg.version.minor) {
+          } else if (greatest.minor > pkg.version.minor) {
             pkg.version.inc("minor");
             repeat = true;
-          }
-
-          if (greatest.patch > pkg.version.patch && type === "fixed") {
+          } else if (greatest.patch > pkg.version.patch && type === "fixed") {
             pkg.version.inc("patch");
             repeat = true;
           }
@@ -266,7 +262,7 @@ export async function createVersioningPlan({
     if (!originalVersion) {
       // This should be already caught. Just to be safe.
       throw await logger.fatal(
-        `Original version for pre-release package '${pkg.name}' is not configured.`,
+        `Original version for pre-release package '${pkg.name}' is not configured.`
       );
     }
     originalVersion = new SemVer(originalVersion);
@@ -295,7 +291,7 @@ export async function createVersioningPlan({
       await logger.debug(
         `Increment package '${
           pkg.name
-        }' version '${currentVersion.format()}' with '${releaseType}' results in '${newVersion.format()}'.`,
+        }' version '${currentVersion.format()}' with '${releaseType}' results in '${newVersion.format()}'.`
       );
     }
 
@@ -337,7 +333,7 @@ async function inferBumpFromCommits({
     const bumpLike = config.options.releaseTypes[detail.cc.type];
     if (!bumpLike) {
       await logger.warn(
-        `Did not recognize CC commit type "${detail.cc.type}". Add it to the 'bump' record in the config.`,
+        `Did not recognize CC commit type "${detail.cc.type}". Add it to the 'bump' record in the config.`
       );
     }
 

@@ -30,6 +30,8 @@ export interface Git {
   readonly version: string;
   log(options?: GitLogOptions): Promise<GitCommit[]>;
   diff(from: string, to?: string): Promise<GifDiff>;
+  getCurrentBranch(): Promise<string>;
+  revParse(ref: string): Promise<string>;
 }
 
 export async function createGit(directory = "."): Promise<Git> {
@@ -50,7 +52,7 @@ export async function createGit(directory = "."): Promise<Git> {
 
   if (!existsSync(gitDirectory)) {
     throw new Error(
-      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?",
+      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?"
     );
   }
 
@@ -99,6 +101,16 @@ export async function createGit(directory = "."): Promise<Git> {
             filename,
           };
         });
+    },
+
+    async getCurrentBranch() {
+      const { stdout } = await $`git branch --show-current`;
+      return stdout.trim();
+    },
+
+    async revParse(ref) {
+      const { stdout } = await $`git rev-parse --verify ${ref}`;
+      return stdout.trim();
     },
   };
 }

@@ -40,7 +40,7 @@ export async function getCommitHistory(options?: Options) {
 
   if (!baseRef) {
     logger.warn(
-      "No base commit found! The whole commit history will be searched!"
+      "No base commit found! The whole commit history will be searched!",
     );
   }
 
@@ -56,19 +56,19 @@ export async function getCommitHistory(options?: Options) {
       const gitDiff = await git.diff(`${commit.hash}`, `${commit.hash}~1`);
       diff = gitDiff.map(
         (entry): FileChange => ({
-          type: {
-            A: FileChangeType.Added,
-            M: FileChangeType.Modified,
-            D: FileChangeType.Deleted,
-          }[entry.type],
+          type:
+            {
+              A: FileChangeType.Added,
+              D: FileChangeType.Deleted,
+            }[entry.type.charAt(0)] ?? FileChangeType.Modified,
           path: resolve(option(options, "workspaceRoot"), entry.filename),
-        })
+        }),
       );
     } catch (error) {
       if (
         error instanceof ExecaError &&
         (error.stderr! as string)?.includes(
-          "unknown revision or path not in the working tree"
+          "unknown revision or path not in the working tree",
         )
       ) {
         logger.verbose(`Found first ever commit [${commit.hash.slice(0, 7)}]!`);
@@ -90,7 +90,7 @@ export async function getCommitHistory(options?: Options) {
     if (invalid.length > 0) {
       logger.warn(
         `Found ${invalid.length} invalid conventional commit summary(s):\n` +
-          renderCommitList(invalid)
+          renderCommitList(invalid),
       );
     }
   }

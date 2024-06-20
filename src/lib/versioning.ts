@@ -18,6 +18,7 @@ import { DEPENDENCY_KEYS } from "./utils/dependencies.js";
 import { readJsoncFile, writeJsoncFile } from "./utils/jsonc.js";
 import { minimatch } from "minimatch";
 import { containsPath } from "./utils/utils.js";
+import slash from "slash";
 
 const DEFAULT_TYPES: Record<string, Bump | null> = {
   patch: "patch",
@@ -47,7 +48,7 @@ export interface VersionUpdate {
 export function createVersioningPlan(
   workspace: Workspace,
   history: CommitHistory,
-  options?: Options
+  options?: Options,
 ): VersionUpdate[] {
   const bumps = new Map<Package, Bump | undefined>();
 
@@ -58,7 +59,7 @@ export function createVersioningPlan(
     ) {
       throw logger.fatal(
         `Pre-release for package '${pkg.name}' is not configured.\n` +
-          `See ${link("https://github.com/tscpp/conventional-versioning/discussions/3.")}`
+          `See ${link("https://github.com/tscpp/conventional-versioning/discussions/3.")}`,
       );
     }
   }
@@ -79,7 +80,7 @@ export function createVersioningPlan(
   const sortedPackages = workspace.packages
     .slice()
     .sort((a, b) =>
-      a.dependencies.some((dependency) => dependency.name === b.name) ? 1 : -1
+      a.dependencies.some((dependency) => dependency.name === b.name) ? 1 : -1,
     );
 
   let repeat = false;
@@ -93,7 +94,7 @@ export function createVersioningPlan(
 
       for (const dependency of ourPackage.dependencies) {
         const theirPackage = workspace.packages.find(
-          (pkg) => pkg.name === dependency.name
+          (pkg) => pkg.name === dependency.name,
         )!;
         const theirBump = bumps.get(theirPackage)!;
 
@@ -126,14 +127,14 @@ export function createVersioningPlan(
       for (const patterns of relations) {
         const included = patterns.flatMap((pattern) =>
           workspace.packages.filter((pkg) =>
-            packagePatternToRegExp(pattern).test(pkg.name)
-          )
+            packagePatternToRegExp(pattern).test(pkg.name),
+          ),
         );
 
         if (included.length === 0) {
           logger.warn(
             `Following patterns specified in the "${type}" option matches no packages:\n` +
-              renderList(patterns)
+              renderList(patterns),
           );
         }
 
@@ -157,7 +158,7 @@ export function createVersioningPlan(
           const version = new SemVer(pkg.version);
 
           const greatest = new SemVer(
-            isPreRelease(pkg.version) ? greatestPre : greatestStable
+            isPreRelease(pkg.version) ? greatestPre : greatestStable,
           );
 
           if (greatest.major > version.major) {
@@ -190,7 +191,7 @@ export function createVersioningPlan(
     if (!baseVersionText) {
       // This should be already caught. Just to be safe.
       throw logger.fatal(
-        `Pre-release for package '${pkg.name}' is not configured.`
+        `Pre-release for package '${pkg.name}' is not configured.`,
       );
     }
     /**
@@ -228,7 +229,7 @@ export function createVersioningPlan(
         resetPreRelease(
           newVersion,
           option(options, "initialPreRelease") ??
-            DEFAULT_OPTIONS.initialPreRelease
+            DEFAULT_OPTIONS.initialPreRelease,
         );
       }
     }
@@ -248,7 +249,7 @@ function inferBumpFromCommits(
   workspace: Workspace,
   pkg: Package,
   history: CommitHistory,
-  options?: Options
+  options?: Options,
 ) {
   let bump: Bump | undefined;
 
@@ -259,6 +260,9 @@ function inferBumpFromCommits(
 
   const workspaceRoot = resolveWorkspaceRoot(workspace);
   const packageRoot = resolvePackageRoot(workspace, pkg);
+
+  /** Normalize path so it works in minimatch. */
+  const minipath = (path: string) => slash(relative(workspaceRoot, path));
 
   const inputs = option(options, "inputs").map((pattern) =>
     pattern
@@ -271,7 +275,7 @@ function inferBumpFromCommits(
       .replaceAll("{packageRoot}", packageRoot)
       .replaceAll("{pkg}", packageRoot)
       .replaceAll("{project}", packageRoot)
-      .replaceAll("{projectRoot}", packageRoot)
+      .replaceAll("{projectRoot}", packageRoot),
   );
   const include = inputs.filter((pattern) => !pattern.startsWith("!"));
   const exclude = inputs
@@ -290,8 +294,12 @@ function inferBumpFromCommits(
           .filter((theirs) => theirs.name !== pkg.name)
           .some((theirs) => containsPath(theirs.path, change.path)) &&
         // and must match patterns
-        include.some((pattern) => minimatch(change.path, pattern)) &&
-        !exclude.some((pattern) => minimatch(change.path, pattern))
+        include.some((pattern) =>
+          minimatch(minipath(change.path), minipath(pattern)),
+        ) &&
+        !exclude.some((pattern) =>
+          minimatch(minipath(change.path), minipath(pattern)),
+        ),
     );
     if (!affected) {
       continue;
@@ -325,18 +333,18 @@ function resolvePackageRoot(workspace: Workspace, pkg: Package) {
 export function validateVersions(
   workspace: Workspace,
   updates: VersionUpdate[],
-  options?: Options
+  options?: Options,
 ) {
   const packagesWithMajorBump = workspace.packages.filter(
     (pkg) =>
-      updates.find((update) => update.name === pkg.name)?.bump === "major"
+      updates.find((update) => update.name === pkg.name)?.bump === "major",
   );
 
   if (packagesWithMajorBump.length > 0 && option(options, "preventMajorBump")) {
     logger.fatal(
       "Commit history includes breaking changes, however major bump are not allowed. " +
         "You have to manually promote the packages:\n" +
-        renderList(packagesWithMajorBump.map((pkg) => pkg.name))
+        renderList(packagesWithMajorBump.map((pkg) => pkg.name)),
     );
   }
 }
@@ -344,7 +352,7 @@ export function validateVersions(
 export async function updateVersions(
   workspace: Workspace,
   updates: VersionUpdate[],
-  options?: Options
+  options?: Options,
 ) {
   validateVersions(workspace, updates, options);
 
@@ -375,7 +383,7 @@ export async function updateVersions(
 
         // Check if internal package.
         const dependencyPackage = workspace.packages.find(
-          (pkg) => pkg.name === name
+          (pkg) => pkg.name === name,
         )!;
         if (!dependencyPackage) {
           continue;
@@ -439,7 +447,7 @@ export async function updateVersions(
           if (allowsPreRelease) {
             if (!option(options, "ignoreOutdatedPreRelease")) {
               logger.warn(
-                `In '${relative(process.cwd(), packageJsonPath)}', dependency "${name}" is set to a pre-release, even though a newer stable version is available.`
+                `In '${relative(process.cwd(), packageJsonPath)}', dependency "${name}" is set to a pre-release, even though a newer stable version is available.`,
               );
             }
             continue;
@@ -460,7 +468,7 @@ export async function updateVersions(
 
   if (updates.length > 0) {
     logger.info(
-      chalk.underline("Updated versions:") + "\n" + renderVersioning(updates)
+      chalk.underline("Updated versions:") + "\n" + renderVersioning(updates),
     );
   } else {
     logger.info("No updates were made!");

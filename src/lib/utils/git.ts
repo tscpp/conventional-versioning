@@ -14,14 +14,8 @@ export interface GitCommit {
   body: string;
 }
 
-export enum GitFileStatusType {
-  Added = "A",
-  Modified = "M",
-  Deleted = "D",
-}
-
 export interface GitFileStatus {
-  type: GitFileStatusType;
+  type: string;
   filename: string;
 }
 
@@ -53,7 +47,7 @@ export async function createGit(options?: Options): Promise<Git> {
 
   if (!existsSync(gitDirectory)) {
     throw new Error(
-      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?"
+      "Directory is not a git repository. Missing '.git' directory. Is git initialized in this directory?",
     );
   }
 
@@ -95,12 +89,9 @@ export async function createGit(options?: Options): Promise<Git> {
         .split("\n")
         .filter((v) => v !== "")
         .map((line) => {
-          const type = line.charAt(0) as GitFileStatusType;
-          const filename = line.slice(2);
-          return {
-            type,
-            filename,
-          };
+          const [type = "", filename = ""] =
+            /^(\S+)\t(\S+)/.exec(line)?.slice(1) ?? [];
+          return { type, filename };
         });
     },
 

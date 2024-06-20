@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { Commit } from "./commit.js";
-import { Bump, Versioning } from "./version.js";
+import { Commit } from "../history.js";
+import { VersionUpdate } from "../versioning.js";
 
 export function renderList(items: Iterable<string>): string {
   const array = Array.from(items);
@@ -21,8 +21,8 @@ export function renderTable(rows: string[][]): string {
 
   return renderList(
     rows.map((row) =>
-      row.map((column, i) => column.padEnd(maxLength[i] ?? 0, " ")).join(" "),
-    ),
+      row.map((column, i) => column.padEnd(maxLength[i] ?? 0, " ")).join(" ")
+    )
   );
 }
 
@@ -32,35 +32,21 @@ export function renderCommitHash(hash: string) {
 
 export function renderCommitList(commits: Commit[]) {
   return renderList(
-    commits.map(
-      (commit) => renderCommitHash(commit.git.hash) + " " + commit.cc.header,
-    ),
+    commits.map((commit) => renderCommitHash(commit.hash) + " " + commit.header)
   );
 }
 
-export function renderVersioning(versioning: readonly Versioning[]): string {
+export function renderVersioning(versioning: readonly VersionUpdate[]): string {
   return renderTable(
     versioning.map((update) => [
       chalk.cyan(update.name) + ":",
       chalk.red(update.oldVersion),
       "->",
       chalk.green(update.newVersion),
-    ]),
+    ])
   );
 }
 
-export function renderBump(bump: Bump): string {
-  switch (bump) {
-    case Bump.None:
-      return chalk.dim("none");
-
-    case Bump.Patch:
-      return chalk.green("patch");
-
-    case Bump.Minor:
-      return chalk.blue("minor");
-
-    case Bump.Major:
-      return chalk.yellow("major");
-  }
+export function link(link: string) {
+  return chalk.underline.blue(link);
 }

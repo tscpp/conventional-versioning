@@ -1,12 +1,10 @@
-export * from "./utils/commit.js";
-export { Config, type Options } from "./utils/config.js";
-export { ENV_PREFIX, PACKAGE_NAME, SCRIPT_NAME } from "./utils/constants.js";
-export * from "./utils/git.js";
-export { default as logger } from "./utils/logger.js";
-export {
-  createVersioningPlan,
-  type Versioning,
-  Bump,
-} from "./utils/version.js";
-export { type Workspace, getWorkspace } from "./utils/workspace.js";
-export { default as run } from "./cli.js";
+export { execute } from "./cli/cli.js";
+
+export * from "./lib/bump.js";
+export * from "./lib/history.js";
+export * from "./lib/logger.js";
+export * from "./lib/options.js";
+export * from "./lib/versioning.js";
+export * from "./lib/workspace.js";
+
+export * from "./lib/utils/jsonc.js";

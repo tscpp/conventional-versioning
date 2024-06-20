@@ -1,14 +1,9 @@
 {
   "$schema": "./schema.json",
   "options": {},
-  "pre": {
-    "prerelease": [
-      "conventional-versioning"
-    ],
-    "original": {
-      "conventional-versioning": "0.1.0"
-    },
-    "promote": {}
-  },
-  "base": "8f413d6dec059b0bb9e975507266b6e85263d90d"
+  "branch": "main",
+  "base": "105b0348bf16f3b66fccb09cb716ef2e0521507b",
+  "preReleases": {
+    "conventional-versioning": "0.1.0"
+  }
 }

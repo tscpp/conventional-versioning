@@ -1,11 +1,14 @@
 import { SemVer } from "semver";
 import { declareCommand } from "../cli.js";
-import logger from "../utils/logger.js";
-import { isPreRelease } from "../utils/version.js";
-import { getWorkspace, savePackageConfig } from "../utils/workspace.js";
 import enquirer from "enquirer";
-import isTTY from "../utils/is-tty.js";
-import { Config } from "../utils/config.js";
+import isTTY from "../../lib/utils/is-tty.js";
+import { logger } from "../../lib/logger.js";
+import { isPreRelease } from "../../lib/utils/version.js";
+import { getWorkspace } from "../../lib/workspace.js";
+import { join } from "node:path";
+import { option } from "../../lib/utils/option.js";
+import { modifyJsoncFile, readJsoncFile } from "../../lib/utils/jsonc.js";
+import { Options } from "../../lib/options.js";
 
 export default declareCommand({
   command: ["pre <enter|exit> [pkgs...]"],
@@ -33,28 +36,25 @@ export default declareCommand({
           }),
         async (args) => {
           const configPath = args.config;
-          const config = await Config.read(configPath);
-          const workspace = await getWorkspace({
-            directory: args.workspaceDir,
-            config,
-          });
+          const options = (await readJsoncFile(args.config)) as Options;
+          const workspace = await getWorkspace(options);
 
           const available = workspace.packages.filter(
-            (pkg) => !isPreRelease(pkg.version),
+            (pkg) => !isPreRelease(pkg.version)
           );
 
           let filter: string[];
           if (args.pkgs.length > 0) {
             filter = args.pkgs;
+          } else if (workspace.packages.length === 1) {
+            filter = ["*"];
           } else if (args.ci || !isTTY) {
-            throw await logger.fatal(
-              "Provide one or more packages to be pre-released.",
+            throw logger.fatal(
+              "Provide one or more packages to be pre-released."
             );
           } else {
             if (available.length === 0) {
-              throw await logger.fatal(
-                "No packages are available for pre-release.",
-              );
+              throw logger.fatal("No packages are available for pre-release.");
             }
 
             filter = (
@@ -94,17 +94,15 @@ export default declareCommand({
           }
 
           if (filter.length === 0) {
-            throw await logger.fatal(
-              "No packages are available for pre-release.",
-            );
+            throw logger.fatal("No packages are available for pre-release.");
           }
 
           let id: string;
           if (args.id) {
             id = args.id;
           } else if (args.ci || !isTTY) {
-            throw await logger.fatal(
-              "You must provide a pre-release identifier using the '--id' flag.",
+            throw logger.fatal(
+              "You must provide a pre-release identifier using the '--id' flag."
             );
           } else {
             id = (
@@ -120,8 +118,8 @@ export default declareCommand({
           if (args.tag) {
             tag = args.tag;
           } else if (args.ci || !isTTY) {
-            throw await logger.fatal(
-              "You must provide a tag using the '--tag' flag.",
+            throw logger.fatal(
+              "You must provide a tag using the '--tag' flag."
             );
           } else {
             tag = (
@@ -134,37 +132,40 @@ export default declareCommand({
           }
 
           const packages = workspace.packages.filter((pkg) =>
-            filter.includes(pkg.name),
+            filter.includes(pkg.name)
           );
 
           for (const pkg of packages) {
-            config.setPreRelease(pkg.name, true);
-
-            if (!config.hasOriginalVersion(pkg.name)) {
-              config.setOriginalVersion(pkg.name, pkg.version.format());
+            if (!args.dry) {
+              await modifyJsoncFile(configPath, [
+                {
+                  path: ["preReleases", pkg.name],
+                  value: pkg.version,
+                },
+              ]);
             }
 
-            pkg.version.prerelease = [
-              id,
-              config.options.initialPreReleaseVersion,
-            ];
-            pkg.config.version = pkg.version.format();
-            pkg.config.publishConfig ??= {};
-            pkg.config.publishConfig.tag = tag;
+            const newVersion = new SemVer(pkg.version);
+            newVersion.prerelease = [id, option(options, "initialPreRelease")];
 
-            if (!args.dryRun) {
-              await savePackageConfig(pkg);
+            if (!args.dry) {
+              await modifyJsoncFile(join(pkg.path, "package.json"), [
+                {
+                  path: ["version"],
+                  value: newVersion.format(),
+                },
+                {
+                  path: ["publishConfig", "tag"],
+                  value: tag,
+                },
+              ]);
             }
           }
 
-          if (!args.dryRun) {
-            await config.save();
-          }
-
-          await logger.warn(
-            `Added ${packages.length} package(s) to pre-release on the next versioning.`,
+          logger.warn(
+            `Added ${packages.length} package(s) to pre-release on the next versioning.`
           );
-        },
+        }
       )
       .command(
         "exit",
@@ -172,28 +173,23 @@ export default declareCommand({
         (cli) => cli,
         async (args) => {
           const configPath = args.config;
-          const config = await Config.read(configPath);
-          const workspace = await getWorkspace({
-            directory: args.workspaceDir,
-            config,
-          });
+          const options = (await readJsoncFile(configPath)) as Options;
+          const workspace = await getWorkspace(options);
 
           const available = workspace.packages.filter((pkg) =>
-            isPreRelease(pkg.version),
+            isPreRelease(pkg.version)
           );
 
           let filter: string[];
           if (args.pkgs.length > 0) {
             filter = args.pkgs;
           } else if (args.ci || !isTTY) {
-            throw await logger.fatal(
-              "Provide one or more packages to exit pre-release.",
+            throw logger.fatal(
+              "Provide one or more packages to exit pre-release."
             );
           } else {
             if (available.length === 0) {
-              throw await logger.fatal(
-                "No packages are configured to pre-release.",
-              );
+              throw logger.fatal("No packages are configured to pre-release.");
             }
 
             filter = (
@@ -229,17 +225,15 @@ export default declareCommand({
           }
 
           if (filter.length === 0) {
-            throw await logger.fatal(
-              "No packages are configured to pre-release.",
-            );
+            throw logger.fatal("No packages are configured to pre-release.");
           }
 
           const packages = workspace.packages.filter((pkg) =>
-            filter.includes(pkg.name),
+            filter.includes(pkg.name)
           );
 
           for (const pkg of packages) {
-            const originalVersion = config.getOriginalVersion(pkg.name);
+            const originalVersion = option(options, "preReleases")[pkg.name];
 
             const currentVersion = new SemVer(pkg.version);
             currentVersion.prerelease = [];
@@ -248,34 +242,34 @@ export default declareCommand({
             // been bumped since pre-released was enabled, meaning that we
             // safely revert the version to the original (stable) version.
             if (originalVersion === currentVersion.format()) {
-              pkg.version = currentVersion;
-              pkg.config.version = pkg.version.format();
-            }
-
-            config.setPreRelease(pkg.name, false);
-            config.setOriginalVersion(pkg.name, undefined);
-
-            // Remove tag from publishConfig.
-            if (pkg.config.publishConfig) {
-              delete pkg.config.publishConfig.tag;
-              if (Object.entries(pkg.config.publishConfig).length === 0) {
-                delete pkg.config.publishConfig;
+              if (!args.dry) {
+                await modifyJsoncFile(join(pkg.path, "package.json"), [
+                  {
+                    path: ["version"],
+                    value: originalVersion,
+                  },
+                  {
+                    path: ["publishConfig", "tag"],
+                    value: undefined,
+                  },
+                ]);
               }
             }
 
-            if (!args.dryRun) {
-              await savePackageConfig(pkg);
+            if (!args.dry) {
+              await modifyJsoncFile(configPath, [
+                {
+                  path: ["preRelease", pkg.name],
+                  value: undefined,
+                },
+              ]);
             }
           }
 
-          if (!args.dryRun) {
-            await config.save();
-          }
-
-          await logger.info(
-            `Removed ${packages.length} package(s) from pre-release on the next versioning.`,
+          logger.info(
+            `Removed ${packages.length} package(s) from pre-release on the next versioning.`
           );
-        },
+        }
       ),
   handler: undefined!,
 });

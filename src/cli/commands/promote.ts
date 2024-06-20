@@ -1,11 +1,17 @@
+import isTTY from "../../lib/utils/is-tty.js";
+import { logger } from "../../lib/logger.js";
+import { renderList } from "../../lib/utils/tui.js";
+import { getWorkspace } from "../../lib/workspace.js";
 import { declareCommand } from "../cli.js";
-import { Config } from "../utils/config.js";
-import isTTY from "../utils/is-tty.js";
-import logger from "../utils/logger.js";
-import { renderList } from "../utils/tui.js";
-import { toBump } from "../utils/version.js";
-import { getWorkspace } from "../utils/workspace.js";
 import enquirer from "enquirer";
+import { Bump, compareBump } from "../../lib/bump.js";
+import { option } from "../../lib/utils/option.js";
+import {
+  JSONCEdit,
+  modifyJsoncFile,
+  readJsoncFile,
+} from "../../lib/utils/jsonc.js";
+import { Options } from "../../lib/options.js";
 
 export default declareCommand({
   command: ["promote [pkgs...]"],
@@ -20,6 +26,7 @@ export default declareCommand({
       .options({
         bump: {
           type: "string",
+          choices: ["patch", "minor", "major"],
         },
         override: {
           type: "boolean",
@@ -27,18 +34,19 @@ export default declareCommand({
         },
       }),
   handler: async (args) => {
-    const config = await Config.read(args.config);
-    const workspace = await getWorkspace({
-      directory: args.workspaceDir,
-      config,
-    });
+    const configPath = args.config;
+    const options = (await readJsoncFile(configPath)) as Options;
+    const workspace = await getWorkspace(options);
 
     let filter: string[];
     if (args.pkgs.length > 0) {
       filter = args.pkgs;
+    } else if (workspace.packages.length === 1) {
+      filter = ["*"];
     } else if (args.ci || !isTTY) {
-      throw await logger.fatal("Provide one or more packages to be promoted.");
+      throw logger.fatal("Provide one or more packages to be promoted.");
     } else {
+      process.stdout.write("\n");
       filter = (
         await enquirer.prompt<{
           filter: string[];
@@ -56,8 +64,8 @@ export default declareCommand({
                 name: pkg.name,
                 value: pkg.name,
               })),
-            } as any,
-          ],
+            },
+          ] as any,
           /* eslint-enable */
         })
       ).filter;
@@ -76,24 +84,24 @@ export default declareCommand({
     }
 
     if (filter.length === 0) {
-      throw await logger.fatal("No packages are available for promotion.");
+      throw logger.fatal("No packages are available for promotion.");
     }
 
     const packages = workspace.packages.filter((pkg) =>
-      filter.includes(pkg.name),
+      filter.includes(pkg.name)
     );
 
-    let bumpText: string;
+    let bump: Bump;
     if (args.bump) {
-      bumpText = args.bump;
+      bump = args.bump as Bump;
     } else if (args.ci || !isTTY) {
-      throw await logger.fatal(
-        "Provide the '--bump' flag with a valid version bump.",
+      throw logger.fatal(
+        "Provide the '--bump' flag with a valid version bump."
       );
     } else {
-      bumpText = (
+      bump = (
         await enquirer.prompt<{
-          bump: string;
+          bump: Bump;
         }>({
           name: "bump",
           type: "select",
@@ -101,17 +109,22 @@ export default declareCommand({
           choices: [{ name: "patch" }, { name: "minor" }, { name: "major" }],
         })
       ).bump;
+      process.stdout.write("\n");
     }
-    const bump = toBump(bumpText);
 
     const conflicts: string[] = [];
     const updated: string[] = [];
 
-    for (const pkg of packages) {
-      const current = config.getPromotion(pkg.name);
+    const edits: JSONCEdit[] = [];
 
-      if (args.override || bump > current) {
-        config.setPromotion(pkg.name, bump);
+    for (const pkg of packages) {
+      const current = option(options, "promotions")[pkg.name];
+
+      if (args.override || !current || compareBump(bump, current) > 0) {
+        edits.push({
+          path: ["promotions", pkg.name],
+          value: bump,
+        });
         updated.push(pkg.name);
       } else {
         conflicts.push(pkg.name);
@@ -119,23 +132,21 @@ export default declareCommand({
     }
 
     if (conflicts.length > 0) {
-      await logger.warn(
+      logger.warn(
         "Following packages already have an equal or greater promotion:\n" +
-          renderList(conflicts),
+          renderList(conflicts)
       );
     }
+
+    await modifyJsoncFile(configPath, edits);
 
     if (updated.length > 0) {
-      await logger.warn(
-        `Following packages recieved '${bumpText}' promotion:\n` +
-          renderList(updated),
+      logger.warn(
+        `Following packages recieved '${bump}' promotion:\n` +
+          renderList(updated)
       );
     } else {
-      await logger.warn("No changes!");
-    }
-
-    if (!args.dryRun) {
-      await config.save();
+      logger.warn("No changes!");
     }
   },
 });

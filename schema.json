@@ -2,103 +2,88 @@
   "$schema": "https://json-schema.org/draft-07/schema",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string"
+    "onlyWorkspaceProtocol": {
+      "type": "boolean"
     },
-    "options": {
+    "overrideComplexRange": {
+      "type": "boolean"
+    },
+    "updateStableToPreRelease": {
+      "type": "boolean"
+    },
+    "ignoreOutdatedPreRelease": {
+      "type": "boolean"
+    },
+    "ignoreInvalidCommit": {
+      "type": "boolean"
+    },
+    "initialPreRelease": {
+      "type": "number"
+    },
+    "preservePreRelease": {
+      "type": "boolean"
+    },
+    "includePrivate": {
+      "type": "boolean"
+    },
+    "allowFirstMajor": {
+      "type": "boolean"
+    },
+    "preventMajorBump": {
+      "type": "boolean"
+    },
+    "releaseTypes": {
       "type": "object",
-      "properties": {
-        "onlyUpdateWorkspaceProtocol": {
-          "type": "boolean"
-        },
-        "allowOverrideComplexRanges": {
-          "type": "boolean"
-        },
-        "allowUpdateStableToPreRelease": {
-          "type": "boolean"
-        },
-        "warnOutdatedPreReleaseUsage": {
-          "type": "boolean"
-        },
-        "ignoreInvalidCommits": {
-          "type": "boolean"
-        },
-        "initialPreReleaseVersion": {
-          "type": "boolean"
-        },
-        "preservePreRelaseSequence": {
-          "type": "boolean"
-        },
-        "includePrivatePackages": {
-          "type": "boolean"
-        },
-        "releaseTypes": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "enum": ["patch", "minor", "major"]
-          }
-        },
-        "include": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "exclude": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "linked": {
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "fixed": {
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["patch", "minor", "major"]
+      }
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
         }
-      },
-      "additionalProperties": false
+      }
+    },
+    "fixed": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
     },
     "base": {
       "type": "string"
     },
-    "pre": {
+    "preReleases": {
       "type": "object",
-      "properties": {
-        "original": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "prerelease": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "promote": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      },
-      "additionalProperties": false
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "promotions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
-  "additionalProperties": false
+  "required": ["base"]
 }

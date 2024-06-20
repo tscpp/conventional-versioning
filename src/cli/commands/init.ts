@@ -1,12 +1,11 @@
 import { writeFile } from "node:fs/promises";
 import { declareCommand } from "../cli.js";
 import { existsSync } from "node:fs";
-import { PACKAGE_NAME } from "../utils/constants.js";
-import { createGit } from "../utils/git.js";
-import logger from "../utils/logger.js";
+import { logger } from "../../lib/logger.js";
 import { ExecaError } from "execa";
-import isTTY from "../utils/is-tty.js";
 import enquirer from "enquirer";
+import isTTY from "../../lib/utils/is-tty.js";
+import { createGit } from "../../lib/utils/git.js";
 
 export default declareCommand({
   command: ["init"],
@@ -22,7 +21,7 @@ export default declareCommand({
     }),
   handler: async (args) => {
     if (existsSync("conver.json")) {
-      await logger.error("conver.json file already exists.");
+      logger.error("conver.json file already exists.");
       return;
     }
 
@@ -53,7 +52,7 @@ export default declareCommand({
       base = args.base;
     } else {
       try {
-        base = await git.revParse("HEAD");
+        base = await git.revParse("HEAD~1");
       } catch (error) {
         if (
           !(
@@ -66,11 +65,17 @@ export default declareCommand({
       }
     }
 
+    if (!base) {
+      logger.warn(
+        "Missing commit history. Next versioning will include entire commit history."
+      );
+    }
+
     await writeFile(
       "conver.json",
       JSON.stringify(
         {
-          $schema: `${PACKAGE_NAME}/schema.json`,
+          $schema: `./node_modules/conventional-versioning/schema.json`,
           options: {},
           branch,
           base,
@@ -79,5 +84,7 @@ export default declareCommand({
         2
       )
     );
+
+    logger.info("Created conver.json file!");
   },
 });

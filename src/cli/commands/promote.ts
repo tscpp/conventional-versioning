@@ -43,7 +43,7 @@ export default declareCommand({
       filter = args.pkgs;
     } else if (workspace.packages.length === 1) {
       filter = ["*"];
-    } else if (args.ci || !isTTY) {
+    } else if (args.ci || !isTTY || args.json) {
       throw logger.fatal("Provide one or more packages to be promoted.");
     } else {
       process.stdout.write("\n");
@@ -94,7 +94,7 @@ export default declareCommand({
     let bump: Bump;
     if (args.bump) {
       bump = args.bump as Bump;
-    } else if (args.ci || !isTTY) {
+    } else if (args.ci || !isTTY || args.json) {
       throw logger.fatal(
         "Provide the '--bump' flag with a valid version bump."
       );

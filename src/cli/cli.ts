@@ -46,6 +46,11 @@ function createCLI(argv: string[]) {
         default: false,
         description: "Write debug logging to 'conver.debug.log'.",
       },
+      json: {
+        type: "boolean",
+        default: false,
+        description: "Format output to json if possible.",
+      },
 
       // Strategy
       yes: {
@@ -99,6 +104,7 @@ function createCLI(argv: string[]) {
         "log",
         "verbose",
         "debug-file",
+        "json"
       ],
       "Logging"
     )
@@ -124,7 +130,11 @@ function createCLI(argv: string[]) {
       cli.showHelpOnFail(false);
 
       const logLevel = toLogLevel(
-        args.log || args.logLevel || (args.verbose && "verbose") || "info"
+        args.log ||
+          args.logLevel ||
+          (args.verbose && "verbose") ||
+          (args.json && "silent") ||
+          "info"
       );
 
       // Avoid throwing errors.

@@ -1,4 +1,4 @@
-import { $ as createScriptMethod } from "execa";
+import { ExecaError, $ as createScriptMethod } from "execa";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -59,7 +59,23 @@ export async function createGit(options?: Options): Promise<Git> {
       const inputs = options?.pattern ?? [];
       const parts = ["%H", "%B"];
       const format = `format:${parts.join("\n")}${separator}`;
-      const { stdout } = await $`git log ${inputs} --format=${format}`;
+
+      let stdout: string;
+      try {
+        const result = await $`git log ${inputs} --format=${format}`;
+        stdout = result.stdout;
+      } catch (error) {
+        if (
+          error instanceof ExecaError &&
+          /your current branch '.+?' does not have any commits yet/.test(
+            error.stderr! as string,
+          )
+        ) {
+          return [];
+        } else {
+          throw error;
+        }
+      }
 
       const logs = [];
 
@@ -87,7 +103,7 @@ export async function createGit(options?: Options): Promise<Git> {
 
       return stdout
         .split("\n")
-        .filter((v) => v !== "")
+        .filter((line) => /^[ARM]\S*\t/.test(line))
         .map((line) => {
           const [type = "", filename = ""] =
             /^(\S+)\t(\S+)/.exec(line)?.slice(1) ?? [];

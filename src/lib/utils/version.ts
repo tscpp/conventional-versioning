@@ -16,12 +16,12 @@ export function isVersion(string: string) {
 
 export function incrementPreRelease(version: SemVer) {
   version.prerelease = version.prerelease.map((id) =>
-    typeof id === "number" ? id + 1 : id
+    typeof id === "number" ? id + 1 : id,
   );
 }
 
 export function resetPreRelease(version: SemVer, number: number) {
   version.prerelease = version.prerelease.map((id) =>
-    typeof id === "number" ? number : id
+    typeof id === "number" ? number : id,
   );
 }

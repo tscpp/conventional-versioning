@@ -24,7 +24,7 @@ export interface Dependency {
 
 export async function getWorkspace(options?: Options): Promise<Workspace> {
   const { packages, rootDir } = await getPackages(
-    option(options, "workspaceRoot")
+    option(options, "workspaceRoot"),
   );
 
   const include = option(options, "include").map(packagePatternToRegExp);
@@ -34,7 +34,7 @@ export async function getWorkspace(options?: Options): Promise<Workspace> {
     path: rootDir,
     packages: packages
       .filter(
-        (pkg) => !pkg.packageJson.private || option(options, "includePrivate")
+        (pkg) => !pkg.packageJson.private || option(options, "includePrivate"),
       )
       .map(
         (pkg): Package => ({
@@ -47,21 +47,21 @@ export async function getWorkspace(options?: Options): Promise<Workspace> {
                 name,
                 version,
                 isPeer: key === "peerDependencies",
-              })
-            )
+              }),
+            ),
           ),
-        })
+        }),
       )
       .filter(
         (pkg) =>
           (!include.length || include.some((regex) => regex.test(pkg.name))) &&
-          exclude.every((regex) => !regex.test(pkg.name))
+          exclude.every((regex) => !regex.test(pkg.name)),
       ),
   };
 }
 
 export function packagePatternToRegExp(pattern: string) {
   return new RegExp(
-    "^" + escapeStringRegexp(pattern).replaceAll("\\*", ".+") + "$"
+    "^" + escapeStringRegexp(pattern).replaceAll("\\*", ".+") + "$",
   );
 }

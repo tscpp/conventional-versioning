@@ -19,7 +19,7 @@ function createCLI(argv: string[]) {
     .env(ENV_PREFIX)
     .epilog(
       "* Tip! Run conver <command> --help to get more details for each command.\n" +
-        `* Tip! You can also pass any flag using the environment variable prefix "${ENV_PREFIX}".`
+        `* Tip! You can also pass any flag using the environment variable prefix "${ENV_PREFIX}".`,
     )
     .wrap(Math.min(100, cli.terminalWidth()))
     .options({
@@ -96,7 +96,7 @@ function createCLI(argv: string[]) {
         "help",
         "version",
       ],
-      "Information"
+      "Information",
     )
     .group(
       [
@@ -104,9 +104,9 @@ function createCLI(argv: string[]) {
         "log",
         "verbose",
         "debug-file",
-        "json"
+        "json",
       ],
-      "Logging"
+      "Logging",
     )
     .group(
       [
@@ -116,7 +116,7 @@ function createCLI(argv: string[]) {
         "dry",
         "force",
       ],
-      "Strategy"
+      "Strategy",
     )
     .group(
       [
@@ -124,7 +124,7 @@ function createCLI(argv: string[]) {
         "config",
         "root",
       ],
-      "Workspace"
+      "Workspace",
     )
     .middleware((args) => {
       cli.showHelpOnFail(false);
@@ -134,7 +134,7 @@ function createCLI(argv: string[]) {
           args.logLevel ||
           (args.verbose && "verbose") ||
           (args.json && "silent") ||
-          "info"
+          "info",
       );
 
       // Avoid throwing errors.
@@ -157,7 +157,7 @@ function createCLI(argv: string[]) {
 
       if (args.force) {
         logger.warn(
-          "Skipping checks since '--force' flag was passed. This may be destructive!"
+          "Skipping checks since '--force' flag was passed. This may be destructive!",
         );
       }
 
@@ -185,7 +185,7 @@ function injectCommands(cli: ReturnType<typeof createCLI>) {
 type CLI = ReturnType<typeof createCLI> extends Argv<infer T> ? T : never;
 
 export function declareCommand<T>(
-  commandModule: CommandModule<CLI, T>
+  commandModule: CommandModule<CLI, T>,
 ): CommandModule<CLI, T> {
   return commandModule;
 }

@@ -88,7 +88,7 @@ export default declareCommand({
     }
 
     const packages = workspace.packages.filter((pkg) =>
-      filter.includes(pkg.name)
+      filter.includes(pkg.name),
     );
 
     let bump: Bump;
@@ -96,7 +96,7 @@ export default declareCommand({
       bump = args.bump as Bump;
     } else if (args.ci || !isTTY || args.json) {
       throw logger.fatal(
-        "Provide the '--bump' flag with a valid version bump."
+        "Provide the '--bump' flag with a valid version bump.",
       );
     } else {
       bump = (
@@ -134,7 +134,7 @@ export default declareCommand({
     if (conflicts.length > 0) {
       logger.warn(
         "Following packages already have an equal or greater promotion:\n" +
-          renderList(conflicts)
+          renderList(conflicts),
       );
     }
 
@@ -143,7 +143,7 @@ export default declareCommand({
     if (updated.length > 0) {
       logger.warn(
         `Following packages recieved '${bump}' promotion:\n` +
-          renderList(updated)
+          renderList(updated),
       );
     } else {
       logger.warn("No changes!");

@@ -21,8 +21,8 @@ export function renderTable(rows: string[][]): string {
 
   return renderList(
     rows.map((row) =>
-      row.map((column, i) => column.padEnd(maxLength[i] ?? 0, " ")).join(" ")
-    )
+      row.map((column, i) => column.padEnd(maxLength[i] ?? 0, " ")).join(" "),
+    ),
   );
 }
 
@@ -32,7 +32,9 @@ export function renderCommitHash(hash: string) {
 
 export function renderCommitList(commits: Commit[]) {
   return renderList(
-    commits.map((commit) => renderCommitHash(commit.hash) + " " + commit.header)
+    commits.map(
+      (commit) => renderCommitHash(commit.hash) + " " + commit.header,
+    ),
   );
 }
 
@@ -43,7 +45,7 @@ export function renderVersioning(versioning: readonly VersionUpdate[]): string {
       chalk.red(update.oldVersion),
       "->",
       chalk.green(update.newVersion),
-    ])
+    ]),
   );
 }
 

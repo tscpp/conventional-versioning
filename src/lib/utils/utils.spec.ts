@@ -22,7 +22,7 @@ describe("containsPath", () => {
   skipIf(process.platform !== "win32")("works with backslashes", () => {
     const value = containsPath(
       "C:\\Users\\elias",
-      "C:\\Users\\elias\\file.txt"
+      "C:\\Users\\elias\\file.txt",
     );
     expect(value).toBe(true);
   });

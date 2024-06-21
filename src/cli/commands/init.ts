@@ -67,7 +67,7 @@ export default declareCommand({
 
     if (!base) {
       logger.warn(
-        "Missing commit history. Next versioning will include entire commit history."
+        "Missing commit history. Next versioning will include entire commit history.",
       );
     }
 
@@ -81,8 +81,8 @@ export default declareCommand({
           base,
         },
         undefined,
-        2
-      )
+        2,
+      ),
     );
 
     logger.info("Created conver.json file!");

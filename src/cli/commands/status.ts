@@ -39,8 +39,8 @@ export default declareCommand({
                 : new SemVer(pkg.version).major === 0
                   ? chalk.yellow("(0.x)")
                   : chalk.dim("(stable)"),
-            ])
-          )
+            ]),
+          ),
       );
       process.stdout.write("\n");
 
@@ -50,13 +50,13 @@ export default declareCommand({
           renderTable(
             Object.entries(promotions)
               .filter((entry) => !!entry[1])
-              .map(([name, bump]) => [chalk.cyan(name), chalk.dim("@"), bump!])
-          )
+              .map(([name, bump]) => [chalk.cyan(name), chalk.dim("@"), bump!]),
+          ),
       );
       process.stdout.write("\n");
 
       logger.info(
-        chalk.underline("Pending updates:") + "\n" + renderVersioning(updates)
+        chalk.underline("Pending updates:") + "\n" + renderVersioning(updates),
       );
       process.stdout.write("\n");
     }

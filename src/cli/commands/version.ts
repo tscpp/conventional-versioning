@@ -41,7 +41,7 @@ export default declareCommand({
       chalk.underline("Pending updates:") +
         "\n" +
         renderVersioning(updates) +
-        "\n"
+        "\n",
     );
     process.stdout.write("\n");
 
@@ -73,7 +73,7 @@ export default declareCommand({
         ...workspace.packages.map((pkg) => ({
           path: ["promotions", pkg.name],
           value: undefined,
-        }))
+        })),
       );
 
       // Update base commit
@@ -86,7 +86,7 @@ export default declareCommand({
     }
 
     logger.info(
-      "All packages' version were successfully updated! Make sure to commit changes."
+      "All packages' version were successfully updated! Make sure to commit changes.",
     );
   },
 });

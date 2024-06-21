@@ -40,7 +40,7 @@ export default declareCommand({
           const workspace = await getWorkspace(options);
 
           const available = workspace.packages.filter(
-            (pkg) => !isPreRelease(pkg.version)
+            (pkg) => !isPreRelease(pkg.version),
           );
 
           let filter: string[];
@@ -50,7 +50,7 @@ export default declareCommand({
             filter = ["*"];
           } else if (args.ci || !isTTY) {
             throw logger.fatal(
-              "Provide one or more packages to be pre-released."
+              "Provide one or more packages to be pre-released.",
             );
           } else {
             if (available.length === 0) {
@@ -102,7 +102,7 @@ export default declareCommand({
             id = args.id;
           } else if (args.ci || !isTTY) {
             throw logger.fatal(
-              "You must provide a pre-release identifier using the '--id' flag."
+              "You must provide a pre-release identifier using the '--id' flag.",
             );
           } else {
             id = (
@@ -119,7 +119,7 @@ export default declareCommand({
             tag = args.tag;
           } else if (args.ci || !isTTY) {
             throw logger.fatal(
-              "You must provide a tag using the '--tag' flag."
+              "You must provide a tag using the '--tag' flag.",
             );
           } else {
             tag = (
@@ -132,7 +132,7 @@ export default declareCommand({
           }
 
           const packages = workspace.packages.filter((pkg) =>
-            filter.includes(pkg.name)
+            filter.includes(pkg.name),
           );
 
           for (const pkg of packages) {
@@ -163,9 +163,9 @@ export default declareCommand({
           }
 
           logger.warn(
-            `Added ${packages.length} package(s) to pre-release on the next versioning.`
+            `Added ${packages.length} package(s) to pre-release on the next versioning.`,
           );
-        }
+        },
       )
       .command(
         "exit",
@@ -177,7 +177,7 @@ export default declareCommand({
           const workspace = await getWorkspace(options);
 
           const available = workspace.packages.filter((pkg) =>
-            isPreRelease(pkg.version)
+            isPreRelease(pkg.version),
           );
 
           let filter: string[];
@@ -185,7 +185,7 @@ export default declareCommand({
             filter = args.pkgs;
           } else if (args.ci || !isTTY) {
             throw logger.fatal(
-              "Provide one or more packages to exit pre-release."
+              "Provide one or more packages to exit pre-release.",
             );
           } else {
             if (available.length === 0) {
@@ -229,7 +229,7 @@ export default declareCommand({
           }
 
           const packages = workspace.packages.filter((pkg) =>
-            filter.includes(pkg.name)
+            filter.includes(pkg.name),
           );
 
           for (const pkg of packages) {
@@ -267,9 +267,9 @@ export default declareCommand({
           }
 
           logger.info(
-            `Removed ${packages.length} package(s) from pre-release on the next versioning.`
+            `Removed ${packages.length} package(s) from pre-release on the next versioning.`,
           );
-        }
+        },
       ),
   handler: undefined!,
 });

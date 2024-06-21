@@ -3,6 +3,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 
 export interface SandboxContext {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   $: ExecaScriptMethod<{}>;
   root: string;
   name: string;

@@ -1,4 +1,4 @@
-# Convetional Versioning
+# Conventional Versioning
 
 [![NPM Version](https://img.shields.io/npm/v/conventional-versioning)](https://npmjs.com/package/conventional-versioning)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tscpp/conventional-versioning/checks.yml)
@@ -99,7 +99,7 @@ You can specify which packages or patterns of packages to include or exclude fro
 }
 ```
 
-### Specifying custom convetional commits
+### Specifying custom conventional commits
 
 ```json
 {
@@ -141,7 +141,7 @@ feat: implement some new feature
 ^ 'feat' type provokes a 'minor' bump
 ```
 
-All types specified by [@commitlint/config-conventional](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional) (based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines)) are defined by default. You can also choose [define custom types](#specifying-custom-convetional-commits).
+All types specified by [@commitlint/config-conventional](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional) (based on the [Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines)) are defined by default. You can also choose [define custom types](#specifying-custom-conventional-commits).
 
 Conventional Versioning will not enforce the valid conventional commit messages. We recommend enforcing the specification using [commitlint]. See their [local setup guide](https://commitlint.js.org/guides/local-setup.html).
 

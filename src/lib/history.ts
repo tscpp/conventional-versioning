@@ -1,4 +1,4 @@
-import { CommitParser as ConvetionalCommitsParser } from "conventional-commits-parser";
+import { CommitParser as ConventionalCommitsParser } from "conventional-commits-parser";
 import { createGit } from "./utils/git.js";
 import { logger } from "./logger.js";
 import { ExecaError } from "execa";
@@ -30,7 +30,7 @@ export type CommitHistory = readonly Commit[];
 export async function getCommitHistory(options?: Options) {
   const git = await createGit(options);
 
-  const cParser = new ConvetionalCommitsParser({
+  const cParser = new ConventionalCommitsParser({
     // ty! https://github.com/conventional-changelog/conventional-changelog/issues/648#issuecomment-704867077
     headerPattern: /^(\w*)(?:\((.*)\))?!?: (.*)$/,
     breakingHeaderPattern: /^(\w*)(?:\((.*)\))?!: (.*)$/,

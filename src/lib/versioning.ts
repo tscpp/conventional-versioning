@@ -15,7 +15,7 @@ import chalk from "chalk";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import { Bump, compareBump } from "./bump.js";
 import { DEPENDENCY_KEYS } from "./utils/dependencies.js";
-import { readJsoncFile, writeJsoncFile } from "./utils/jsonc.js";
+import { JSONCEdit, modifyJsoncFile, readJsoncFile } from "./utils/jsonc.js";
 import { minimatch } from "minimatch";
 import { containsPath } from "./utils/utils.js";
 import slash from "slash";
@@ -38,6 +38,7 @@ const DEFAULT_TYPES: Record<string, Bump | null> = {
   chore: null,
 };
 
+//#region Versioning Plan
 export interface VersionUpdate {
   name: string;
   oldVersion: string;
@@ -329,7 +330,9 @@ function resolvePackageRoot(workspace: Workspace, pkg: Package) {
   }
   return packageRoot;
 }
+//#endregion
 
+//#region Versioning
 export function validateVersions(
   workspace: Workspace,
   updates: VersionUpdate[],
@@ -366,11 +369,16 @@ export async function updateVersions(
       optionalDependencies: Record<string, string>;
     };
 
+    const edits: JSONCEdit[] = [];
+
     // Update our package's version.
     const update = updates.find((update) => update.name === pkg.name);
     if (update) {
       pkg.version = update.newVersion;
-      packageJson.version = update.newVersion;
+      edits.push({
+        path: ["version"],
+        value: update.newVersion,
+      });
     }
 
     for (const dependencyKey of DEPENDENCY_KEYS) {
@@ -457,13 +465,17 @@ export async function updateVersions(
             continue;
           }
 
-          dependencies[name] =
-            protocol + comparator + dependencyPackage.version;
+          const newVersion = protocol + comparator + dependencyPackage.version;
+
+          edits.push({
+            path: [dependencyKey, name],
+            value: newVersion,
+          });
         }
       }
     }
 
-    await writeJsoncFile(packageJsonPath, packageJson);
+    await modifyJsoncFile(packageJsonPath, edits);
   }
 
   if (updates.length > 0) {
@@ -474,3 +486,4 @@ export async function updateVersions(
     logger.info("No updates were made!");
   }
 }
+//#endregion

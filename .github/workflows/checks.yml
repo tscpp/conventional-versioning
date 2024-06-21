@@ -57,6 +57,9 @@ jobs:
           name: build-artifacts
           path: dist/
 
+      - run: git config --global user.email "you@example.com"
+      - run: git config --global user.name "Your Name"
+
       - name: Use Node.js 20.x
         uses: actions/setup-node@v3
         with:

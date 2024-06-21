@@ -53,7 +53,7 @@ export async function getCommitHistory(options?: Options) {
     const cc = cParser.parse(commit.body);
     let diff: FileChange[] = [];
     try {
-      const gitDiff = await git.diff(`${commit.hash}`, `${commit.hash}~1`);
+      const gitDiff = await git.diff(`${commit.hash}^`, commit.hash);
       diff = gitDiff.map(
         (entry): FileChange => ({
           type:

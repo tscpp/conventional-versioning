@@ -42,7 +42,8 @@
     "lint": "eslint src",
     "prepare": "husky",
     "release": "npm run build && npm run version && npm publish",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js src",
+    "e2e": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js e2e",
     "version": "node ./dist/cli/main.js version"
   },
   "dependencies": {

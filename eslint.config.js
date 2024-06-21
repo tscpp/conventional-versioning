@@ -8,10 +8,10 @@ export default [
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        project: ["tsconfig.json", "test/tsconfig.json"],
+        project: ["tsconfig.lib.json", "tsconfig.test.json"],
       },
     },
-    ignores: ["**/*", "!src/**/*"],
+    ignores: ["**/*", "!src/**/*", "!e2e/**/*"],
   },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

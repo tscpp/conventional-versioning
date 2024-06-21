@@ -3,14 +3,14 @@
   "tasks": [
     {
       "type": "typescript",
-      "tsconfig": "tsconfig.json",
+      "tsconfig": "tsconfig.lib.json",
       "option": "watch",
       "problemMatcher": ["$tsc-watch"],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "label": "tsc: watch - tsconfig.json"
+      "label": "tsc: watch - tsconfig.lib.json"
     }
   ]
 }

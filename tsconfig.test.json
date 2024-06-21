@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "@jest/globals"],
+    "noEmit": true,
+    "resolveJsonModule": true
+  },
+  "exclude": ["dist"],
+  "include": [
+    "e2e",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.spec.js",
+    "**/*.test.js",
+    "**/__test__",
+    "**/__tests__",
+    "**/__mock__",
+    "**/__mocks__",
+    "**/__fixture__",
+    "**/__fixtures__"
+  ]
+}

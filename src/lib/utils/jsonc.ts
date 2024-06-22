@@ -1,5 +1,4 @@
 import * as jsonc from "jsonc-parser";
-import MagicString from "magic-string";
 import detectIndent from "detect-indent";
 import { detectNewline } from "detect-newline";
 import { readFile, writeFile } from "node:fs/promises";
@@ -15,37 +14,28 @@ export interface JSONCEdit {
 }
 
 export async function modifyJsoncFile(path: string, edits: JSONCEdit[]) {
-  const originalText = await readFile(path, "utf8");
-  const modified = new MagicString(originalText);
+  let text = await readFile(path, "utf8");
 
   // Formatting
-  const indent = detectIndent(originalText);
+  const indent = detectIndent(text);
   const formattingOptions: jsonc.FormattingOptions = {
-    eol: detectNewline(originalText) ?? "\n",
+    eol: detectNewline(text) ?? "\n",
     tabSize: indent.amount,
     insertSpaces: (indent.type ?? "space") === "space",
   };
 
   // Apply edits
-  const changes = edits.flatMap((edit) =>
-    jsonc.modify(
+  for (const edit of edits) {
+    const jsoncEdits = jsonc.modify(
       //
-      originalText,
+      text,
       edit.path,
       edit.value,
       { formattingOptions },
-    ),
-  );
-  for (const change of changes) {
-    modified.update(
-      //
-      change.offset,
-      change.offset + change.length,
-      change.content,
     );
+    text = jsonc.applyEdits(text, jsoncEdits);
   }
 
   // Save file
-  const modifiedText = modified.toString();
-  await writeFile(path, modifiedText);
+  await writeFile(path, text);
 }

@@ -241,7 +241,7 @@ export function createVersioningPlan(
 
 function inferBumpFromCommits(
   workspace: Workspace,
-  pkg: Package,
+  our: Package,
   history: CommitHistory,
   options?: Options,
 ) {
@@ -253,10 +253,10 @@ function inferBumpFromCommits(
   };
 
   const workspaceRoot = resolveWorkspaceRoot(workspace);
-  const packageRoot = resolvePackageRoot(workspace, pkg);
+  const packageRoot = resolvePackageRoot(workspace, our);
 
   /** Normalize path so it works in minimatch. */
-  const minipath = (path: string) => slash(relative(workspaceRoot, path));
+  const normalize = (path: string) => slash(relative(workspaceRoot, path));
 
   const inputs = option(options, "inputs").map((pattern) =>
     pattern
@@ -271,10 +271,13 @@ function inferBumpFromCommits(
       .replaceAll("{project}", packageRoot)
       .replaceAll("{projectRoot}", packageRoot),
   );
-  const include = inputs.filter((pattern) => !pattern.startsWith("!"));
+  const include = inputs
+    .filter((pattern) => !pattern.startsWith("!"))
+    .map(normalize);
   const exclude = inputs
     .filter((pattern) => pattern.startsWith("!"))
-    .map((pattern) => pattern.slice(1));
+    .map((pattern) => pattern.slice(1))
+    .map(normalize);
 
   for (const commit of history) {
     if (!commit.type) {
@@ -283,17 +286,15 @@ function inferBumpFromCommits(
 
     const affected = commit.diff.some(
       (change) =>
-        // another package cannot contain the file
-        !workspace.packages
-          .filter((theirs) => theirs.name !== pkg.name)
-          .some((theirs) => containsPath(theirs.path, change.path)) &&
+        // either we contain the path ...
+        (containsPath(our.path, change.path) ||
+          // ...or another package cannot contain the file
+          !workspace.packages
+            .filter((their) => their.name !== our.name)
+            .some((theirs) => containsPath(theirs.path, change.path))) &&
         // and must match patterns
-        include.some((pattern) =>
-          minimatch(minipath(change.path), minipath(pattern)),
-        ) &&
-        !exclude.some((pattern) =>
-          minimatch(minipath(change.path), minipath(pattern)),
-        ),
+        include.some((pattern) => minimatch(normalize(change.path), pattern)) &&
+        !exclude.some((pattern) => minimatch(normalize(change.path), pattern)),
     );
     if (!affected) {
       continue;

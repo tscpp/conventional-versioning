@@ -1,7 +1,7 @@
 import { $, ExecaScriptMethod } from "execa";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import jsonc from "jsonc-parser";
 
 export default async function sandbox(
@@ -32,7 +32,9 @@ export class Sandbox {
 
   async writeFiles(files: Record<string, string>): Promise<void> {
     for (const [name, data] of Object.entries(files)) {
-      await writeFile(join(this.root, name), data);
+      const path = join(this.root, name);
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, data);
     }
   }
 

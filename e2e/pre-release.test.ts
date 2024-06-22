@@ -77,7 +77,6 @@ it("exists pre-release", async () => {
 
     // check config
     const options = (await sandbox.readJsoncFile("conver.json")) as Options;
-    console.log(options);
     expect(Object.keys(options.preReleases ?? {})).not.toContain("my-package");
   });
 });

@@ -5,5 +5,7 @@
   },
   "files.associations": {
     "conver.json": "jsonc"
-  }
+  },
+  "jestrunner.jestCommand": "clear; node --no-warnings --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+  "jestrunner.changeDirectoryToWorkspaceRoot": false
 }

@@ -50,7 +50,7 @@ export default declareCommand({
           initial: true,
         });
         if (!confirm) {
-          return;
+          process.exit(1);
         }
         process.stdout.write("\n");
       }

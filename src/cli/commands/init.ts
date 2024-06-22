@@ -73,16 +73,23 @@ export default declareCommand({
 
     await writeFile(
       "conver.json",
-      JSON.stringify(
-        {
-          $schema: `./node_modules/conventional-versioning/schema.json`,
-          options: {},
-          branch,
-          base,
-        },
-        undefined,
-        2,
-      ),
+      [
+        "/*",
+        "  This config file manages the options and current state for versioning.",
+        "  See https://github.com/tscpp/conventional-versioning#readme.",
+        "*/",
+      ].join("\n") +
+        "\n" +
+        JSON.stringify(
+          {
+            $schema: `./node_modules/conventional-versioning/schema.json`,
+            options: {},
+            branch,
+            base,
+          },
+          undefined,
+          2,
+        ),
     );
 
     logger.info("Created conver.json file!");

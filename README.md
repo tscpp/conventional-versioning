@@ -52,29 +52,14 @@ bun add --save-dev conventional-versioning
 
 ## Configuration
 
+You can find the declaration and defaults for the configuration (options) at <https://github.com/tscpp/conventional-versioning/blob/main/src/lib/options.ts>.
+
+### Initializing a new configuration
+
 This command will generate a new configuration file at `conver.json` for you.
 
 ```sh
 npx conver init
-```
-
-### Linking verions
-
-There are two methods for linking packages. `linked` ensures that all major and minor versions are released together, while `fixed` ensures that all versions, including patches, are released together.
-
-```json
-{
-  "options": {
-    "linked": [
-      //
-      ["a", "b"]
-    ],
-    "fixed": [
-      //
-      ["c", "d"]
-    ]
-  }
-}
 ```
 
 ### Including and excluding packages
@@ -83,52 +68,49 @@ You can specify which packages or patterns of packages to include or exclude fro
 
 ```json
 {
-  "options": {
-    "include": [
-      // Include all packages under @some-scope/
-      "@some-scope/*",
-      // And also these packages
-      "a",
-      "b"
-    ],
-    // And exclude all packages under @other-scope/.
-    "exclude": ["@other-scope/*"],
-    // Also exclude all private packages.
-    "ignorePrivatePackages": true
-  }
+  "include": [
+    // Include all packages under @some-scope/
+    "@some-scope/*",
+    // And also these packages
+    "a",
+    "b"
+  ],
+  // And exclude all packages under @other-scope/.
+  "exclude": ["@other-scope/*"],
+  // Also exclude all private packages.
+  "ignorePrivatePackages": true
 }
 ```
 
 ### Specifying custom conventional commits
 
+You can specify custom mapping from conventional commit types to the version bump like the below example.
+
 ```json
 {
-  "options": {
-    "releaseTypes": {
-      // Commit "addition: some features" will infer a minor bump for affected packages.
-      "addition": "minor"
-    }
+  "customTypes": {
+    // Commit "addition: some features" will infer a minor bump for affected packages.
+    "addition": "minor"
   }
 }
 ```
 
-### Options
+### Linking versions between packages
 
-- **onlyUpdateWorkspaceProtocol**: Restrict version updates to those using the workspace protocol. Default: `false`.
+There are two methods for linking packages. `linked` ensures that all major and minor versions are released together, while `fixed` ensures that all versions, including patches, are released together.
 
-- **allowOverrideComplexRanges**: Override complex version ranges with the new version when the specified range cannot be detected. Default: `false`.
-
-- **allowUpdateStableToPreRelease**: Allow updating the version of internal dependencies to a pre-release when a stable version was previously specified. Default: `false`.
-
-- **warnOutdatedPreReleaseUsage**: Issue a warning when pre-releases are used while newer stable releases exist for internal dependencies. Default: `true`.
-
-- **ignoreInvalidCommits**: Choose whether to warn when a commit message does not follow the conventional commits specification. Pre-commit hooks are recommended for enforcing conventional commits. Default: `false`.
-
-- **initialPreReleaseVersion**: Set the initial version of the pre-release identifier. For example, specify `1` to start with `-beta.1` instead of `-beta.0`. Default: `0`.
-
-- **preservePreReleaseSequence**: Preserve the sequence (version) of the pre-release identifier when bumping the version. Default: `false`.
-
-- **ignorePrivatePackages**: Whether to ignore or include all private packages by default. Default: `true`.
+```json
+{
+  "linked": [
+    // Will release with same minor.
+    ["a", "b"]
+  ],
+  "fixed": [
+    // Will release with same patch.
+    ["c", "d"]
+  ]
+}
+```
 
 ## Usage
 
@@ -187,10 +169,8 @@ This will add the package to the `pre.promote` field in the config. If you need 
 
 ```diff
 {
-  "pre": {
-    "promote": {
-+     "some-package": "major"
-    }
+  "promotions": {
++   "some-package": "major"
   }
 }
 ```

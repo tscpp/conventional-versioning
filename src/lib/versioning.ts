@@ -186,20 +186,13 @@ export function createVersioningPlan(
     /** The package's current version. */
     const currentVersion = new SemVer(pkg.version);
 
-    const baseVersionText = isPreRelease(pkg.version)
-      ? option(options, "preReleases")?.[pkg.name]
-      : pkg.version;
-    if (!baseVersionText) {
-      // This should be already caught. Just to be safe.
-      throw logger.fatal(
-        `Pre-release for package '${pkg.name}' is not configured.`,
-      );
-    }
     /**
      * The version to base increments from. Normally this is the same as
      * {@link currentVersion}, except in pre-releases.
      */
-    const baseVersion = new SemVer(baseVersionText);
+    const baseVersion = new SemVer(
+      option(options, "preReleases")[pkg.name] ?? pkg.version,
+    );
 
     // Limit bump for '0.x' packages to 'minor', to prevent releasing the first
     // stable version, which may not be wanted.

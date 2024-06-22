@@ -21,7 +21,7 @@ export default declareCommand({
         default: [],
       })
       .command(
-        "enter",
+        "enter [pkgs...]",
         "Enter prerelease.",
         (cli) =>
           cli.options({
@@ -168,7 +168,7 @@ export default declareCommand({
         },
       )
       .command(
-        "exit",
+        "exit [pkgs...]",
         "Exit prerelease.",
         (cli) => cli,
         async (args) => {
@@ -233,35 +233,30 @@ export default declareCommand({
           );
 
           for (const pkg of packages) {
-            const originalVersion = option(options, "preReleases")[pkg.name];
+            const mainVersion = new SemVer(pkg.version);
+            mainVersion.prerelease = [];
 
-            const currentVersion = new SemVer(pkg.version);
-            currentVersion.prerelease = [];
-
-            // If the below condition is true, that means the version has not
-            // been bumped since pre-released was enabled, meaning that we
-            // safely revert the version to the original (stable) version.
-            if (originalVersion === currentVersion.format()) {
-              if (!args.dry) {
-                await modifyJsoncFile(join(pkg.path, "package.json"), [
-                  {
-                    path: ["version"],
-                    value: originalVersion,
-                  },
-                  {
-                    path: ["publishConfig", "tag"],
-                    value: undefined,
-                  },
-                ]);
-              }
-            }
+            const packageJsonPath = join(pkg.path, "package.json");
+            const packageJson = (await readJsoncFile(packageJsonPath)) as {
+              publishConfig?: {
+                tag?: unknown;
+              };
+            };
 
             if (!args.dry) {
-              await modifyJsoncFile(configPath, [
+              await modifyJsoncFile(packageJsonPath, [
                 {
-                  path: ["preRelease", pkg.name],
-                  value: undefined,
+                  path: ["version"],
+                  value: mainVersion.format(),
                 },
+                ...(packageJson.publishConfig?.tag
+                  ? [
+                      {
+                        path: ["publishConfig", "tag"],
+                        value: undefined,
+                      },
+                    ]
+                  : []),
               ]);
             }
           }

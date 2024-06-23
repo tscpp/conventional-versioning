@@ -106,7 +106,7 @@ export interface Options {
    * Record of conventional commit type to version bump. By default, all types
    * specified by `@commitlint/config-conventional` (based on the Angular convention) are defined.
    */
-  customTypes?: Record<string, Bump | null> | undefined;
+  bumps?: Record<string, Bump | null> | undefined;
 
   /**
    * A record of manual promotions and their version bump to be incremented for each package.
@@ -148,7 +148,7 @@ export const DEFAULT_OPTIONS = {
   fixed: [],
   inputs: ["{workspace}/**/*", "{package}/**/*"],
   base: undefined,
-  customTypes: {},
+  bumps: {},
   promotions: {},
   preReleases: {},
   workspaceRoot: "./",

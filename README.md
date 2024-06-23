@@ -131,7 +131,7 @@ You can specify custom mapping from conventional commit types to the version bum
 
 ```jsonc
 {
-  "customTypes": {
+  "bumps": {
     // Commit "addition: some features" will infer a minor bump for affected packages.
     "addition": "minor"
   }

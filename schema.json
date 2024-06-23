@@ -32,7 +32,7 @@
     "preventMajorBump": {
       "type": "boolean"
     },
-    "releaseTypes": {
+    "bumps": {
       "type": "object",
       "additionalProperties": {
         "type": "string",

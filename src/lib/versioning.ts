@@ -19,7 +19,7 @@ import { minimatch } from "minimatch";
 import { containsPath } from "./utils/utils.js";
 import slash from "slash";
 
-const DEFAULT_TYPES: Record<string, Bump | null> = {
+const DEFAULT_BUMPS: Record<string, Bump | null> = {
   patch: "patch",
   minor: "minor",
   breaking: "major",
@@ -301,8 +301,8 @@ function inferBumpFromCommits(
   let bump: Bump | undefined;
 
   const typeMap = {
-    ...DEFAULT_TYPES,
-    ...option(options, "customTypes"),
+    ...DEFAULT_BUMPS,
+    ...option(options, "bumps"),
   };
 
   const workspaceRoot = resolveWorkspaceRoot(workspace);

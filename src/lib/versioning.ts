@@ -84,10 +84,12 @@ export function createVersioningPlan(
       a.dependencies.some((dependency) => dependency.name === b.name) ? 1 : -1,
     );
 
-  let repeat = false;
+  let repeat: boolean;
   // TODO: This is somewhat of a hack. We repeat this until no more changes can
   // be done.
   do {
+    repeat = false;
+
     // Check if we need to update any internal dependencies used in the
     // workspace packages.
     for (const ourPackage of sortedPackages) {

@@ -525,13 +525,5 @@ export async function updateVersions(
 
     await modifyJsoncFile(packageJsonPath, edits);
   }
-
-  if (updates.length > 0) {
-    logger.info(
-      chalk.underline("Updated versions:") + "\n" + renderVersioning(updates),
-    );
-  } else {
-    logger.info("No updates were made!");
-  }
 }
 //#endregion

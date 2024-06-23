@@ -47,12 +47,14 @@ export async function getCommitHistory(options?: Options) {
   const gitCommits = await git.log({
     pattern: baseRef ? ["HEAD", `^${baseRef}`] : [],
   });
+  logger.debug(`Found ${gitCommits.length} commits since '${baseRef}'.`);
 
   const commits: Commit[] = [];
   for (const commit of gitCommits) {
     const cc = cParser.parse(commit.body);
     let diff: FileChange[] = [];
     try {
+      logger.debug(`Getting diff for commit '${commit.hash}'.`);
       const gitDiff = await git.diff(`${commit.hash}^`, commit.hash);
       diff = gitDiff.map(
         (entry): FileChange => ({

@@ -1,4 +1,4 @@
-import { Range, SemVer, compare } from "semver";
+import { Range, SemVer } from "semver";
 import { CommitHistory } from "./history.js";
 import { logger } from "./logger.js";
 import { DEFAULT_OPTIONS, Options } from "./options.js";
@@ -51,6 +51,8 @@ export function createVersioningPlan(
   history: CommitHistory,
   options?: Options,
 ): VersionUpdate[] {
+  logger.debug("Creating versioning plan.");
+
   const bumps = new Map<Package, Bump | undefined>();
 
   for (const pkg of workspace.packages) {
@@ -68,8 +70,12 @@ export function createVersioningPlan(
   for (const pkg of workspace.packages) {
     let bump = inferBumpFromCommits(workspace, pkg, history, options);
 
+    logger.debug(`Infered bump '${bump}' for package '${pkg.name}'.`);
+
     const promotion = option(options, "promotions")[pkg.name];
     if (promotion) {
+      logger.debug(`Package has promotion '${pkg.name}'.`);
+
       if (!bump || compareBump(bump, promotion) > 0) {
         bump = promotion;
       }
@@ -92,6 +98,7 @@ export function createVersioningPlan(
 
     // Check if we need to update any internal dependencies used in the
     // workspace packages.
+    logger.debug("Checking for internal dependency updates.");
     for (const ourPackage of sortedPackages) {
       const ourBump = bumps.get(ourPackage)!;
 
@@ -106,6 +113,9 @@ export function createVersioningPlan(
           compareBump(theirBump, "patch") >= 0 &&
           compareBump(ourBump, "patch") < 0
         ) {
+          logger.debug(
+            `Package '${ourPackage.name}' was bumped to 'patch' since it's dependency '${theirPackage.name}' needs an update.`,
+          );
           bumps.set(ourPackage, "patch");
           repeat = true;
         }
@@ -117,6 +127,9 @@ export function createVersioningPlan(
           compareBump(theirBump, "minor") >= 0 &&
           compareBump(ourBump, "major") < 0
         ) {
+          logger.debug(
+            `Package '${ourPackage.name}' was bumped to 'major' since it's PEER dependency '${theirPackage.name}' needs an update.`,
+          );
           bumps.set(ourPackage, "major");
           repeat = true;
         }
@@ -124,6 +137,7 @@ export function createVersioningPlan(
     }
 
     // Check for any linked/fixed relations between workspace packages.
+    logger.debug("Making sure linked/fixed relations are applied.");
     for (const type of ["linked", "fixed"] as const) {
       const relations = option(options, type);
 
@@ -132,6 +146,13 @@ export function createVersioningPlan(
           workspace.packages.filter((pkg) =>
             packagePatternToRegExp(pattern).test(pkg.name),
           ),
+        );
+
+        logger.debug(
+          `Following "${type}" packages...\n` +
+            renderList(included.map((pkg) => `"${pkg.name}"`)) +
+            "\n... were included in patterns:\n" +
+            renderList(patterns.map((pattern) => `"${pattern}"`)),
         );
 
         if (included.length === 0) {
@@ -144,12 +165,25 @@ export function createVersioningPlan(
         const stablePkgs = included.filter((pkg) => !isPreRelease(pkg.version));
         const prePkgs = included.filter((pkg) => isPreRelease(pkg.version));
 
-        const greatestStable = stablePkgs
-          .map((pkg) => pkg.version)
-          .reduce((a, b) => (compare(a, b) >= 0 ? a : b));
-        const greatestPre = prePkgs
-          .map((pkg) => pkg.version)
-          .reduce((a, b) => (compare(a, b) >= 0 ? a : b));
+        const greatestStable =
+          stablePkgs.length > 0
+            ? stablePkgs
+                .map((pkg) => new SemVer(pkg.version))
+                .reduce((a, b) => (a.compare(b) >= 0 ? a : b))
+            : undefined;
+        const greatestPre =
+          prePkgs.length > 0
+            ? prePkgs
+                .map((pkg) => new SemVer(pkg.version))
+                .reduce((a, b) => (a.compare(b) >= 0 ? a : b))
+            : undefined;
+
+        logger.debug(
+          `Greatest version for ${stablePkgs.length} stable packages is '${greatestStable?.format()}'.`,
+        );
+        logger.debug(
+          `Greatest version for ${prePkgs.length} stable packages is '${greatestPre?.format()}'.`,
+        );
 
         for (const pkg of included) {
           // Stable versions set the minimum for both stable and pre-release

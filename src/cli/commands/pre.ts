@@ -139,7 +139,7 @@ export default declareCommand({
             if (!args.dry) {
               await modifyJsoncFile(configPath, [
                 {
-                  path: ["preReleases", pkg.name],
+                  path: ["original", pkg.name],
                   value: pkg.version,
                 },
               ]);

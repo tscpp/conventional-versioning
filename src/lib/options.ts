@@ -117,12 +117,12 @@ export interface Options {
   promotions?: Record<string, Bump | undefined> | undefined;
 
   /**
-   * A record of packages to pre-release and their original version.
+   * A record of packages and their original version.
    *
    * @example
    * { "my-package": "1.2.3" }
    */
-  preReleases?: Record<string, string> | undefined;
+  original?: Record<string, string> | undefined;
 
   /**
    * Path to the root workspace directory.
@@ -150,6 +150,6 @@ export const DEFAULT_OPTIONS = {
   base: undefined,
   bumps: {},
   promotions: {},
-  preReleases: {},
+  original: {},
   workspaceRoot: "./",
 } satisfies Required<Options>;

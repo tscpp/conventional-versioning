@@ -55,12 +55,9 @@ export function createVersioningPlan(
   const bumps = new Map<Package, Bump | undefined>();
 
   for (const pkg of workspace.packages) {
-    if (
-      isPreRelease(pkg.version) &&
-      !option(options, "preReleases")[pkg.name]
-    ) {
+    if (isPreRelease(pkg.version) && !option(options, "original")[pkg.name]) {
       throw logger.fatal(
-        `Pre-release for package '${pkg.name}' is not configured.\n` +
+        `Original version for package '${pkg.name}' is not configured.\n` +
           `See ${link("https://github.com/tscpp/conventional-versioning/discussions/3.")}`,
       );
     }
@@ -244,7 +241,7 @@ export function createVersioningPlan(
      * {@link currentVersion}, except in pre-releases.
      */
     const baseVersion = new SemVer(
-      option(options, "preReleases")[pkg.name] ?? pkg.version,
+      option(options, "original")[pkg.name] ?? pkg.version,
     );
 
     // Limit bump for '0.x' packages to 'minor', to prevent releasing the first

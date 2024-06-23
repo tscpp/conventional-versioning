@@ -33,7 +33,7 @@ it("enters pre-release", async () => {
 
     // check config
     const config = (await sandbox.readJsoncFile("conver.json")) as Options;
-    expect(config.preReleases).toMatchObject({ "my-package": "1.2.3" });
+    expect(config.original).toMatchObject({ "my-package": "1.2.3" });
   });
 });
 
@@ -49,7 +49,7 @@ it("exists pre-release", async () => {
         },
       }),
       "conver.json": json({
-        preReleases: {
+        original: {
           "my-package": "1.2.3",
         },
       }),
@@ -77,7 +77,7 @@ it("exists pre-release", async () => {
 
     // check config
     const options = (await sandbox.readJsoncFile("conver.json")) as Options;
-    expect(Object.keys(options.preReleases ?? {})).not.toContain("my-package");
+    expect(Object.keys(options.original ?? {})).not.toContain("my-package");
   });
 });
 
@@ -93,7 +93,7 @@ it("bumps pre-release version", async () => {
         },
       }),
       "conver.json": json({
-        preReleases: {
+        original: {
           "my-package": "1.2.3",
         },
       }),

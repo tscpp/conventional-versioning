@@ -97,10 +97,10 @@ export default declareCommand({
       ...workspace.packages
         .filter(
           (pkg) =>
-            !isPreRelease(pkg.version) && !!options.preReleases?.[pkg.name],
+            !isPreRelease(pkg.version) && !!options.original?.[pkg.name],
         )
         .map((pkg) => ({
-          path: ["preReleases", pkg.name],
+          path: ["original", pkg.name],
           value: undefined,
         })),
     );

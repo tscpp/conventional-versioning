@@ -3,7 +3,7 @@
   "options": {},
   "branch": "main",
   "base": "105b0348bf16f3b66fccb09cb716ef2e0521507b",
-  "preReleases": {
+  "original": {
     "conventional-versioning": "0.1.0"
   }
 }

@@ -72,7 +72,7 @@
     "base": {
       "type": "string"
     },
-    "preReleases": {
+    "original": {
       "type": "object",
       "additionalProperties": {
         "type": "string"

@@ -23,11 +23,26 @@ export default async function sandbox(
 export class Sandbox {
   // eslint-disable-next-line @typescript-eslint/ban-types
   readonly $: ExecaScriptMethod<{}>;
+  /**
+   * @deprecated Do not commit. Only use for debugging.
+   */
+  readonly debug$: ExecaScriptMethod<{
+    stdio: "inherit";
+  }>;
 
   preserve = false;
 
   constructor(private root: string) {
-    this.$ = $({ cwd: root });
+    this.$ = $({
+      cwd: root,
+    });
+    this.debug$ = $({
+      cwd: root,
+      stdio: "inherit",
+      env: {
+        CONVER_LOG: "debug",
+      },
+    });
   }
 
   async writeFiles(files: Record<string, string>): Promise<void> {

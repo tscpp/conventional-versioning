@@ -159,19 +159,37 @@ export function createVersioningPlan(
           // bump other pre-release siblings.
 
           const version = new SemVer(pkg.version);
+          const bump = bumps.get(pkg);
 
-          const greatest = new SemVer(
-            isPreRelease(pkg.version) ? greatestPre : greatestStable,
-          );
+          const greatest = isPreRelease(pkg.version)
+            ? greatestPre
+            : greatestStable;
+          if (!greatest) continue;
 
-          if (greatest.major > version.major) {
-            bumps.set(pkg, "major");
-            repeat = true;
-          } else if (greatest.minor > version.minor) {
-            bumps.set(pkg, "minor");
-            repeat = true;
-          } else if (greatest.patch > version.patch && type === "fixed") {
-            bumps.set(pkg, "patch");
+          let newBump: Bump | undefined;
+          if (
+            greatest.major > version.major &&
+            (!bump || compareBump(bump, "major") < 0)
+          ) {
+            newBump = "major";
+          } else if (
+            greatest.minor > version.minor &&
+            (!bump || compareBump(bump, "minor") < 0)
+          ) {
+            newBump = "minor";
+          } else if (
+            greatest.patch > version.patch &&
+            !bump &&
+            type === "fixed"
+          ) {
+            newBump = "patch";
+          }
+
+          if (newBump) {
+            logger.debug(
+              `Package '${pkg.name}' were bumped to '${newBump}' because it is ${type}.`,
+            );
+            bumps.set(pkg, newBump);
             repeat = true;
           }
         }

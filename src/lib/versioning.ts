@@ -3,7 +3,7 @@ import { CommitHistory } from "./history.js";
 import { logger } from "./logger.js";
 import { DEFAULT_OPTIONS, Options } from "./options.js";
 import { option } from "./utils/option.js";
-import { link, renderList, renderVersioning } from "./utils/tui.js";
+import { link, renderList } from "./utils/tui.js";
 import {
   incrementPreRelease,
   isPreRelease,
@@ -11,7 +11,6 @@ import {
   resetPreRelease,
 } from "./utils/version.js";
 import { Package, Workspace, packagePatternToRegExp } from "./workspace.js";
-import chalk from "chalk";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import { Bump, compareBump } from "./bump.js";
 import { DEPENDENCY_KEYS } from "./utils/dependencies.js";

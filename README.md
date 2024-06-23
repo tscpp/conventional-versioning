@@ -3,12 +3,6 @@
 [![NPM Version](https://img.shields.io/npm/v/conventional-versioning)](https://npmjs.com/package/conventional-versioning)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tscpp/conventional-versioning/checks.yml)
 
-## Experimental!
-
-This package is still under development, so bugs may be encountered and crucial features might be missing. Use it solely for testing the library at this stage. For more details, see [tscpp/conventional-versioning#1](https://github.com/tscpp/conventional-versioning/issues/1).
-
-The semantic versioning specification allows this library to introduce **breaking changes in any release** during the `0.x` major version.
-
 ## Introduction
 
 Conventional Versioning is a library designed to simplify the versioning of packages, particularly in larger monorepo setups. It uses [conventional commits] to detect new versions for packages automatically but also supports manual version promotion if needed. As expected, it adheres to [semantic versioning] (semver).
@@ -25,14 +19,63 @@ Manual changes (promotions and pre-releases) are stored in the config file until
 
 ### Features
 
-- **Simplified Version Management**: Easily manage the versioning of your packages.
-- **Version Synchronization**: Link and fix versions between related packages.
-- **Monorepo Support**: Seamlessly handle multiple packages within monorepos.
-- **Pre-releases**: Create and manage individual pre-releases for your packages.
-- **Manual Version Promotion**: Manually promote specific packages to new versions.
-- **Dependency Updates**: Automatically update the versions of dependent packages.
-- **Automated Version Detection**: Use conventional commits to automatically detect and set new versions.
-- **High Configurability**: Customize the tool to fit various workflows and requirements.
+<table>
+<thead>
+<tr>
+<th width="33%">
+Single- & monorepo
+</th>
+<th width="33%">
+Independant versions
+</th>
+<th width="33%">
+Pre-releases
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+We support both single-package and multi-package repositories seamlessly.
+</td>
+<td>
+Each package gets its own version and updates only when necessary.
+</td>
+<td>
+Easily manage multiple independent pre-release versions using the interactive CLI.
+</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<thead>
+<tr>
+<th width="33%">
+Promotions
+</th>
+<th width="33%">
+Dependencies
+</th>
+<th width="33%">
+Automated
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Manually promote a new version bump using the interactive CLI.
+</td>
+<td>
+Internal dependencies within the workspace are automatically updated.
+</td>
+<td>
+This solution requires no manual work and can be configured to handle versioning for you.
+</td>
+</tr>
+</tbody>
+</table>
 
 ## Installation
 
@@ -66,7 +109,7 @@ npx conver init
 
 You can specify which packages or patterns of packages to include or exclude from versioning. If the `include` field is specified, even as an empty array, all packages not matching the `include` patterns will be excluded. Additionally, you can use the `ignorePrivatePackages` option to control whether all private packages are ignored or included by default.
 
-```json
+```jsonc
 {
   "include": [
     // Include all packages under @some-scope/
@@ -86,7 +129,7 @@ You can specify which packages or patterns of packages to include or exclude fro
 
 You can specify custom mapping from conventional commit types to the version bump like the below example.
 
-```json
+```jsonc
 {
   "customTypes": {
     // Commit "addition: some features" will infer a minor bump for affected packages.
@@ -99,7 +142,7 @@ You can specify custom mapping from conventional commit types to the version bum
 
 There are two methods for linking packages. `linked` ensures that all major and minor versions are released together, while `fixed` ensures that all versions, including patches, are released together.
 
-```json
+```jsonc
 {
   "linked": [
     // Will release with same minor.

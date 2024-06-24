@@ -2,10 +2,9 @@
   "$schema": "./schema.json",
   "options": {},
   "branch": "main",
-  "base": "037cce8ad32e9ed9022b80f3089848583f9aac1a",
+  "base": "04152b5cad236db5b0d589068e54cb85319cf89e",
   "original": {
   },
   "promotions": {
-    "conventional-versioning": "patch"
   }
 }

@@ -2,8 +2,7 @@
   "$schema": "./schema.json",
   "options": {},
   "branch": "main",
-  "base": "105b0348bf16f3b66fccb09cb716ef2e0521507b",
+  "base": "037cce8ad32e9ed9022b80f3089848583f9aac1a",
   "original": {
-    "conventional-versioning": "0.1.0"
   }
 }

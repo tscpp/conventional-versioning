@@ -183,6 +183,8 @@ export default declareCommand({
           let filter: string[];
           if (args.pkgs.length > 0) {
             filter = args.pkgs;
+          } else if (workspace.packages.length === 1) {
+            filter = ["*"];
           } else if (args.ci || !isTTY) {
             throw logger.fatal(
               "Provide one or more packages to exit pre-release.",

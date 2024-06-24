@@ -96,8 +96,7 @@ export default declareCommand({
     edits.push(
       ...workspace.packages
         .filter(
-          (pkg) =>
-            !isPreRelease(pkg.version) && !!options.original?.[pkg.name],
+          (pkg) => !isPreRelease(pkg.version) && !!options.original?.[pkg.name],
         )
         .map((pkg) => ({
           path: ["original", pkg.name],
@@ -121,6 +120,6 @@ export default declareCommand({
       );
     }
 
-    logger.info("Finished!");
+    logger.info("Versioning is finished!");
   },
 });

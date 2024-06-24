@@ -1,6 +1,6 @@
 import { CommitParser as ConventionalCommitsParser } from "conventional-commits-parser";
 import { createGit } from "./utils/git.js";
-import { logger } from "./logger.js";
+import logger from "./logger.js";
 import { ExecaError } from "execa";
 import { renderCommitList } from "./utils/tui.js";
 import { Options } from "./options.js";

@@ -10,7 +10,7 @@ import chalk from "chalk";
 import { renderVersioning } from "../../lib/utils/tui.js";
 import enquirer from "enquirer";
 import isTTY from "../../lib/utils/is-tty.js";
-import { logger } from "../../lib/logger.js";
+import logger from "../../lib/logger.js";
 import {
   JSONCEdit,
   modifyJsoncFile,

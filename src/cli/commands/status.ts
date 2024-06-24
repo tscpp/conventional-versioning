@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { declareCommand } from "../cli.js";
-import { logger } from "../../lib/logger.js";
+import logger from "../../lib/logger.js";
 import { renderTable, renderVersioning } from "../../lib/utils/tui.js";
 import { createVersioningPlan } from "../../lib/versioning.js";
 import { getWorkspace } from "../../lib/workspace.js";

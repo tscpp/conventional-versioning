@@ -1,5 +1,5 @@
 import isTTY from "../../lib/utils/is-tty.js";
-import { logger } from "../../lib/logger.js";
+import logger from "../../lib/logger.js";
 import { renderList } from "../../lib/utils/tui.js";
 import { getWorkspace } from "../../lib/workspace.js";
 import { declareCommand } from "../cli.js";

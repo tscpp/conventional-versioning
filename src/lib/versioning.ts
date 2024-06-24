@@ -1,6 +1,6 @@
 import { Range, SemVer } from "semver";
 import { CommitHistory } from "./history.js";
-import { logger } from "./logger.js";
+import logger from "./logger.js";
 import { DEFAULT_OPTIONS, Options } from "./options.js";
 import { option } from "./utils/option.js";
 import { link, renderList } from "./utils/tui.js";

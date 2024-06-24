@@ -1,5 +1,5 @@
 import yargs, { Argv, CommandModule } from "yargs";
-import { logger, LogLevel, Log } from "../lib/logger.js";
+import logger from "../lib/logger.js";
 import isCI from "is-ci";
 import { ENV_PREFIX, SCRIPT_NAME } from "./constants.js";
 import init from "./commands/init.js";
@@ -8,8 +8,8 @@ import promote from "./commands/promote.js";
 import status from "./commands/status.js";
 import version from "./commands/version.js";
 import { appendFileSync, openSync } from "node:fs";
-import { Chalk, supportsColor } from "chalk";
 import stripAnsi from "strip-ansi";
+import { Log, LogLevel, formatLog, printLog } from "@eliassko/logger";
 
 function createCLI(argv: string[]) {
   const cli = yargs(argv);
@@ -138,21 +138,16 @@ function createCLI(argv: string[]) {
       );
 
       // Avoid throwing errors.
-      logger.exitGracefully = true;
+      logger.throw = false;
 
       // Pipe logger to console
-      logger
-        .clone()
-        .pipe(createLogFormatter({ colorize: true }))
-        .pipe(createLogWriter(logLevel));
+      logger.onLog((log) => printLog(formatLog(log)), logLevel);
 
       // Pipe logger to debug log
       if (args.debugFile) {
-        logger
-          .clone()
-          .pipe(createLogFormatter())
-          .pipe(createLogUncolorizer())
-          .pipe(createLogFileWriter("conver.debug.log", LogLevel.Debug));
+        const writeLog = createLogWriter("conver.debug.log");
+
+        logger.onLog((log) => writeLog(uncolorizeLog(formatLog(log))));
       }
 
       if (args.force) {
@@ -221,84 +216,18 @@ function toLogLevel(value: string): LogLevel {
   }
 }
 
-interface FormatLogOptions {
-  colorize?: boolean | undefined;
-}
-
-function createLogFormatter(options?: FormatLogOptions) {
-  return (log: Log): Log => {
-    const chalk = new Chalk({
-      level: options?.colorize && supportsColor ? supportsColor.level : 0,
-    });
-
-    let text = log.text;
-
-    switch (log.level) {
-      case LogLevel.Debug:
-        text = chalk.dim(applyLinePrefix(text, "[DBUG] "));
-        break;
-
-      case LogLevel.Verbose:
-        text = chalk.dim(applyLinePrefix(text, "[VERB] "));
-        break;
-
-      case LogLevel.Info:
-        text = applyLinePrefix(text, chalk.blue("[INFO] "));
-        break;
-
-      case LogLevel.Warning:
-        text = applyLinePrefix(text, chalk.yellow("[WARN] "));
-        break;
-
-      case LogLevel.Error:
-        text = applyLinePrefix(text, chalk.red("[ERR!] "));
-        break;
-    }
-
-    return {
-      ...log,
-      text,
-    };
-  };
-
-  function applyLinePrefix(text: string, prefix: string) {
-    return text
-      .split("\n")
-      .map((line) => prefix + line)
-      .join("\n");
-  }
-}
-
-function createLogUncolorizer() {
-  return (log: Log): Log => {
-    const text = stripAnsi(log.text);
-    return {
-      ...log,
-      text,
-    };
+function uncolorizeLog(log: Log): Log {
+  const text = stripAnsi(log.text);
+  return {
+    ...log,
+    text,
   };
 }
 
-function createLogFileWriter(path: string, level: LogLevel) {
+function createLogWriter(path: string) {
   const fd = openSync(path, "w");
 
   return (log: Log): void => {
-    if (log.level > level) {
-      return;
-    }
-
     appendFileSync(fd, log.text + "\n");
-  };
-}
-
-function createLogWriter(level: LogLevel) {
-  return (log: Log): void => {
-    if (log.level > level) {
-      return;
-    }
-
-    const stream =
-      log.level <= LogLevel.Warning ? process.stderr : process.stdout;
-    stream.write(log.text + "\n");
   };
 }

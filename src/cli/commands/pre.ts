@@ -2,7 +2,7 @@ import { SemVer } from "semver";
 import { declareCommand } from "../cli.js";
 import enquirer from "enquirer";
 import isTTY from "../../lib/utils/is-tty.js";
-import { logger } from "../../lib/logger.js";
+import logger from "../../lib/logger.js";
 import { isPreRelease } from "../../lib/utils/version.js";
 import { getWorkspace } from "../../lib/workspace.js";
 import { join } from "node:path";

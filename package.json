@@ -47,6 +47,7 @@
     "version": "node ./dist/cli/main.js version"
   },
   "dependencies": {
+    "@eliassko/logger": "^1.0.2",
     "@manypkg/get-packages": "^2.2.1",
     "conventional-commits-parser": "^6.0.0",
     "detect-indent": "^7.0.1",
@@ -86,8 +87,7 @@
     "typescript-eslint": "^7.13.0",
     "yargs": "^17.7.2"
   },
-  "publishConfig": {
-  },
+  "publishConfig": {},
   "overrides": {
     "eslint": "$eslint"
   }

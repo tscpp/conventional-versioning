@@ -3,7 +3,7 @@ import { Options } from "./options.js";
 import { option } from "./utils/option.js";
 import escapeStringRegexp from "escape-string-regexp";
 import { DEPENDENCY_KEYS } from "./utils/dependencies.js";
-import { logger } from "./logger.js";
+import logger from "./logger.js";
 
 export interface Workspace {
   path: string;

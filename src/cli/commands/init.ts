@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { declareCommand } from "../cli.js";
 import { existsSync } from "node:fs";
-import { logger } from "../../lib/logger.js";
+import logger from "../../lib/logger.js";
 import { ExecaError } from "execa";
 import enquirer from "enquirer";
 import isTTY from "../../lib/utils/is-tty.js";

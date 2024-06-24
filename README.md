@@ -1,7 +1,9 @@
 # Conventional Versioning
 
-[![NPM Version](https://img.shields.io/npm/v/conventional-versioning)](https://npmjs.com/package/conventional-versioning)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tscpp/conventional-versioning/checks.yml)
+[![NPM Version](https://img.shields.io/npm/v/conventional-versioning?color=red)](https://npmjs.com/package/conventional-versioning)
+[![NPM Downloads](https://img.shields.io/npm/dm/conventional-versioning?color=blue)
+](https://www.npmjs.com/package/conventional-versioning)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tscpp/conventional-versioning/checks.yml?label=checks)](https://github.com/tscpp/conventional-versioning/actions/workflows/checks.yml)
 
 ## Introduction
 
@@ -116,12 +118,12 @@ You can specify which packages or patterns of packages to include or exclude fro
     "@some-scope/*",
     // And also these packages
     "a",
-    "b"
+    "b",
   ],
   // And exclude all packages under @other-scope/.
   "exclude": ["@other-scope/*"],
   // Also exclude all private packages.
-  "ignorePrivatePackages": true
+  "ignorePrivatePackages": true,
 }
 ```
 
@@ -133,8 +135,8 @@ You can specify custom mapping from conventional commit types to the version bum
 {
   "bumps": {
     // Commit "addition: some features" will infer a minor bump for affected packages.
-    "addition": "minor"
-  }
+    "addition": "minor",
+  },
 }
 ```
 
@@ -146,12 +148,12 @@ There are two methods for linking packages. `linked` ensures that all major and 
 {
   "linked": [
     // Will release with same minor.
-    ["a", "b"]
+    ["a", "b"],
   ],
   "fixed": [
     // Will release with same patch.
-    ["c", "d"]
-  ]
+    ["c", "d"],
+  ],
 }
 ```
 

@@ -4,5 +4,8 @@
   "branch": "main",
   "base": "037cce8ad32e9ed9022b80f3089848583f9aac1a",
   "original": {
+  },
+  "promotions": {
+    "conventional-versioning": "patch"
   }
 }

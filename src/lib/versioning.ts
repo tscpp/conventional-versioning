@@ -288,12 +288,14 @@ export function createVersioningPlan(
       newVersion = currentVersion;
     }
 
-    versioning.push({
-      name: pkg.name,
-      oldVersion: currentVersion.format(),
-      newVersion: newVersion.format(),
-      bump,
-    });
+    if (newVersion.compare(currentVersion) > 0) {
+      versioning.push({
+        name: pkg.name,
+        oldVersion: currentVersion.format(),
+        newVersion: newVersion.format(),
+        bump,
+      });
+    }
   }
 
   return versioning;

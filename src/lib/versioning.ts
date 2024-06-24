@@ -233,6 +233,14 @@ export function createVersioningPlan(
     let bump = bumps.get(pkg);
     if (!bump) continue;
 
+    /** The package's original version before pre-release. */
+    const originalVersion = option(options, "original")[pkg.name];
+
+    /** Current version is pre-release. */
+    const isPre = isPreRelease(pkg.version);
+    /** Was pre-release in previous versioning. */
+    const wasPre = !!originalVersion;
+
     /** The package's current version. */
     const currentVersion = new SemVer(pkg.version);
 
@@ -240,9 +248,7 @@ export function createVersioningPlan(
      * The version to base increments from. Normally this is the same as
      * {@link currentVersion}, except in pre-releases.
      */
-    const baseVersion = new SemVer(
-      option(options, "original")[pkg.name] ?? pkg.version,
-    );
+    const baseVersion = new SemVer(originalVersion ?? pkg.version);
 
     // Limit bump for '0.x' packages to 'minor', to prevent releasing the first
     // stable version, which may not be wanted.
@@ -258,7 +264,7 @@ export function createVersioningPlan(
     let newVersion = baseVersion.inc(bump);
     newVersion.prerelease = currentVersion.prerelease;
 
-    if (isPreRelease(currentVersion)) {
+    if (isPre) {
       // When the main version (stable version before pre-release suffix) has
       // not changed, revert to the current version.
       const noMainBump = currentVersion.compareMain(newVersion) >= 0;
@@ -276,6 +282,10 @@ export function createVersioningPlan(
             DEFAULT_OPTIONS.initialPreRelease,
         );
       }
+    }
+
+    if (wasPre && currentVersion.compare(newVersion) > 0) {
+      newVersion = currentVersion;
     }
 
     versioning.push({

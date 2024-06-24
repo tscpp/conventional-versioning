@@ -63,7 +63,7 @@ it("exists pre-release", async () => {
     await sandbox.$`${CONVER} pre exit my-package`;
 
     // check package
-    const pkg = (await sandbox.readJsoncFile("package.json")) as {
+    let pkg = (await sandbox.readJsoncFile("package.json")) as {
       version?: string;
       publishConfig?: {
         tag?: string;
@@ -74,6 +74,67 @@ it("exists pre-release", async () => {
 
     // versioning
     await sandbox.$`${CONVER} version`;
+
+    // check package
+    pkg = (await sandbox.readJsoncFile("package.json")) as {
+      version?: string;
+      publishConfig?: {
+        tag?: string;
+      };
+    };
+    expect(pkg.version).toBe("1.3.0");
+    expect(pkg.publishConfig?.tag).toBe(undefined);
+
+    // check config
+    const options = (await sandbox.readJsoncFile("conver.json")) as Options;
+    expect(Object.keys(options.original ?? {})).not.toContain("my-package");
+  });
+});
+
+it("preserves version after pre-release exit", async () => {
+  await sandbox(async (sandbox) => {
+    // package.json
+    await sandbox.writeFiles({
+      "package.json": json({
+        name: "my-package",
+        version: "1.3.0-rc.5",
+        publishConfig: {
+          tag: "next",
+        },
+      }),
+      "conver.json": json({
+        original: {
+          "my-package": "1.2.3",
+        },
+      }),
+    });
+
+    // init sandbox
+    await sandbox.$`git init`;
+    await sandbox.$`git commit -m ${"chore: first commit"} --allow-empty`;
+
+    // add commit
+    await sandbox.writeFiles({
+      "foo.txt": "foo",
+    });
+    await sandbox.$`git add foo.txt`;
+    await sandbox.$`git commit -m ${"fix: add foo"}`;
+
+    // exit pre-release
+    await sandbox.$`${CONVER} pre exit my-package`;
+
+    // versioning
+    await sandbox.$`${CONVER} version`;
+
+    // check package
+    const pkg = (await sandbox.readJsoncFile("package.json")) as {
+      version?: string;
+      publishConfig?: {
+        tag?: string;
+      };
+    };
+    expect(pkg.version).toBe("1.3.0");
+    expect(pkg.publishConfig?.tag).toBe(undefined);
 
     // check config
     const options = (await sandbox.readJsoncFile("conver.json")) as Options;

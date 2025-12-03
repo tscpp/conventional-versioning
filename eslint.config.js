@@ -15,4 +15,9 @@ export default [
   },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
+  {
+    rules: {
+      "@typescript-eslint/only-throw-error": "off"
+    }
+  }
 ];

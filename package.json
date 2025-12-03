@@ -49,6 +49,7 @@
   "dependencies": {
     "@eliassko/logger": "^1.0.2",
     "@manypkg/get-packages": "^2.2.1",
+    "chalk": "^5.3.0",
     "conventional-commits-parser": "^6.0.0",
     "detect-indent": "^7.0.1",
     "detect-newline": "^4.0.1",
@@ -59,7 +60,8 @@
     "jsonc-parser": "^3.2.1",
     "minimatch": "^9.0.4",
     "semver": "^7.6.2",
-    "slash": "^5.1.0"
+    "slash": "^5.1.0",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.5.0",
@@ -72,8 +74,6 @@
     "@types/node": "^20.14.2",
     "@types/semver": "^7.5.8",
     "@types/yargs": "^17.0.32",
-    "chalk": "^5.3.0",
-    "cross-env": "^7.0.3",
     "eslint": "^9.5.0",
     "globals": "^15.5.0",
     "husky": "^9.0.11",
@@ -84,8 +84,7 @@
     "pretty-quick": "^4.0.0",
     "ts-jest-resolver": "^2.0.1",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.13.0",
-    "yargs": "^17.7.2"
+    "typescript-eslint": "^7.13.0"
   },
   "publishConfig": {},
   "overrides": {

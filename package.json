@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@eliassko/logger": "^1.1.0",
-    "@manypkg/get-packages": "^3.1.0",
+    "@manypkg/get-packages": "^2.2.2",
     "chalk": "^5.6.2",
     "conventional-commits-parser": "^6.2.1",
     "detect-indent": "^7.0.2",
